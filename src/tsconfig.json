@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outFile": "../javascripts/ghost_mansion/game.js"
+    },
+    "files": [
+        "game.ts",
+        "preloader.ts",
+        "map1.ts"
+    ]
+}
+

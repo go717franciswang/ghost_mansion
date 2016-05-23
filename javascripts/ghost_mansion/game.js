@@ -1,0 +1,70 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+/// <reference path="./phaser.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var Preloader = (function (_super) {
+        __extends(Preloader, _super);
+        function Preloader() {
+            _super.apply(this, arguments);
+        }
+        Preloader.prototype.preload = function () {
+            this.load.path = '/resources/ghost_mansion/';
+            this.load.tilemap('mario', 'test.json', null, Phaser.Tilemap.TILED_JSON);
+            this.load.image('tiles', 'biomechamorphs_001.png');
+        };
+        Preloader.prototype.create = function () {
+            this.game.state.start('Map1');
+        };
+        return Preloader;
+    }(Phaser.State));
+    GhostMansion.Preloader = Preloader;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var Map1 = (function (_super) {
+        __extends(Map1, _super);
+        function Map1() {
+            _super.apply(this, arguments);
+        }
+        Map1.prototype.create = function () {
+            this.stage.backgroundColor = '#787878';
+            //  The 'mario' key here is the Loader key given in game.load.tilemap
+            var map = this.add.tilemap('mario');
+            var box = this.make.graphics(0, 0);
+            box.lineStyle(8, 0xFF0000, 0.8);
+            box.beginFill(0xFF700B, 1);
+            box.drawRect(-10, -10, 10, 10);
+            box.endFill();
+            //  The first parameter is the tileset name, as specified in the Tiled map editor (and in the tilemap json file)
+            //  The second parameter maps this name to the Phaser.Cache key 'tiles'
+            map.addTilesetImage('biomechamorphs_001', 'tiles');
+            //  Creates a layer from the World1 layer in the map data.
+            //  A Layer is effectively like a Phaser.Sprite, so is added to the display list.
+            var layer = map.createLayer('Tile Layer 1');
+            //  This resizes the game world to match the layer dimensions
+            layer.resizeWorld();
+            this.player = this.add.sprite(this.world.centerX, this.world.centerY, box.generateTexture());
+            this.player.anchor.set(0.5);
+        };
+        return Map1;
+    }(Phaser.State));
+    GhostMansion.Map1 = Map1;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./preloader.ts"/>
+/// <reference path="./map1.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    function startGame() {
+        var game = new Phaser.Game(320, 240, Phaser.AUTO, 'container');
+        game.state.add('Preloader', GhostMansion.Preloader);
+        game.state.add('Map1', GhostMansion.Map1);
+        game.state.start('Preloader');
+    }
+    GhostMansion.startGame = startGame;
+})(GhostMansion || (GhostMansion = {}));

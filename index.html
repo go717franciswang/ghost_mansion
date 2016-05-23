@@ -1,17 +1,12 @@
 <html>
 <head>
-<script src="js/phaser.min.js"></script>
-<script src="js/preloader.js"></script>
-<script src="js/map1.js"></script>
+<script src="/javascripts/ghost_mansion/phaser.min.js"></script>
 </head>
 <body>
 <div id="container"></div>
+<script src="/javascripts/ghost_mansion/game.js"></script>
 <script>
-var scale = 3.5;
-var game = new Phaser.Game(320*scale, 240*scale, Phaser.AUTO, 'container');
-game.state.add('Preloader', GhostMansion.Preloader);
-game.state.add('Map1', GhostMansion.Map1);
-game.state.start('Preloader');
+GhostMansion.startGame();
 </script>
 </body>
 </html>
