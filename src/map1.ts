@@ -1,8 +1,10 @@
 /// <reference path="./phaser.d.ts"/>
+/// <reference path="./input_controller.ts"/>
 
 module GhostMansion {
     export class Map1 extends Phaser.State {
         player: Phaser.Sprite;
+        controller: any;
 
         create() {
             this.stage.backgroundColor = '#787878';
@@ -32,6 +34,18 @@ module GhostMansion {
                 box.generateTexture()
             );
             this.player.anchor.set(0.5);
+
+            this.controller = new InputController(this.player, this, {
+                left: Phaser.KeyCode.LEFT,
+                right: Phaser.KeyCode.RIGHT,
+                up: Phaser.KeyCode.UP,
+                down: Phaser.KeyCode.DOWN,
+                action: Phaser.KeyCode.ENTER
+            }, () => { console.log('action'); } );
+        }
+
+        update() {
+            this.controller.update();
         }
     }
 }

@@ -5,7 +5,8 @@
     "files": [
         "game.ts",
         "preloader.ts",
-        "map1.ts"
+        "map1.ts",
+        "input_controller"
     ]
 }
 

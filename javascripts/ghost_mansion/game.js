@@ -23,7 +23,36 @@ var GhostMansion;
     }(Phaser.State));
     GhostMansion.Preloader = Preloader;
 })(GhostMansion || (GhostMansion = {}));
+var GhostMansion;
+(function (GhostMansion) {
+    var InputController = (function () {
+        function InputController(sprite, game, keyMap, action) {
+            this.sprite = sprite;
+            this.game = game;
+            this.keyMap = keyMap;
+            this.action = action;
+            this.velocity = 1;
+        }
+        InputController.prototype.update = function () {
+            if (this.game.input.keyboard.isDown(this.keyMap.left)) {
+                this.sprite.x -= this.velocity;
+            }
+            else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
+                this.sprite.x += this.velocity;
+            }
+            if (this.game.input.keyboard.isDown(this.keyMap.up)) {
+                this.sprite.y -= this.velocity;
+            }
+            else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
+                this.sprite.y += this.velocity;
+            }
+        };
+        return InputController;
+    }());
+    GhostMansion.InputController = InputController;
+})(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
+/// <reference path="./input_controller.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     var Map1 = (function (_super) {
@@ -50,6 +79,16 @@ var GhostMansion;
             layer.resizeWorld();
             this.player = this.add.sprite(this.world.centerX, this.world.centerY, box.generateTexture());
             this.player.anchor.set(0.5);
+            this.controller = new GhostMansion.InputController(this.player, this, {
+                left: Phaser.KeyCode.LEFT,
+                right: Phaser.KeyCode.RIGHT,
+                up: Phaser.KeyCode.UP,
+                down: Phaser.KeyCode.DOWN,
+                action: Phaser.KeyCode.ENTER
+            }, function () { console.log('action'); });
+        };
+        Map1.prototype.update = function () {
+            this.controller.update();
         };
         return Map1;
     }(Phaser.State));
