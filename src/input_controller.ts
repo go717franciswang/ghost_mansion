@@ -19,12 +19,16 @@ module GhostMansion {
                 this.sprite.x -= this.velocity;
             } else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
                 this.sprite.x += this.velocity;
-
             }
+
             if (this.game.input.keyboard.isDown(this.keyMap.up)) {
                 this.sprite.y -= this.velocity;
             } else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
                 this.sprite.y += this.velocity;
+            }
+
+            if (this.game.input.keyboard.isDown(this.keyMap.action)) {
+                this.action();
             }
         }
     }

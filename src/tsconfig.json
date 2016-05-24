@@ -5,8 +5,9 @@
     "files": [
         "game.ts",
         "preloader.ts",
-        "map1.ts",
-        "input_controller"
+        "input_controller",
+        "controllable_sprite",
+        "map1.ts"
     ]
 }
 
