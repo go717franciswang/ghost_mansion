@@ -5,6 +5,7 @@
 module GhostMansion {
     export class Map1 extends Phaser.State {
         players: Phaser.Group;
+        ghost: Phaser.Sprite;
 
         create() {
             this.stage.backgroundColor = '#787878';
@@ -42,6 +43,7 @@ module GhostMansion {
                 action: Phaser.KeyCode.ENTER
             }, () => { console.log('action'); } );
 
+            this.ghost = this.add.sprite(this.world.centerX, this.world.centerY, box.generateTexture());
         }
 
         update() {

@@ -105,6 +105,7 @@ var GhostMansion;
                 down: Phaser.KeyCode.DOWN,
                 action: Phaser.KeyCode.ENTER
             }, function () { console.log('action'); });
+            this.ghost = this.add.sprite(this.world.centerX, this.world.centerY, box.generateTexture());
         };
         Map1.prototype.update = function () {
             this.players.forEachAlive(function (controllable) {
