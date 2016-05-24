@@ -6,34 +6,42 @@ module GhostMansion {
     export class Map1 extends Phaser.State {
         players: Phaser.Group;
         ghost: Phaser.Sprite;
+        walls: Phaser.TilemapLayer;
+        p: any;
 
         create() {
+            this.physics.startSystem(Phaser.Physics.ARCADE);
             this.stage.backgroundColor = '#787878';
 
-            //  The 'mario' key here is the Loader key given in game.load.tilemap
-            var map = this.add.tilemap('mario');
+            var map = this.add.tilemap('map');
             var box = this.make.graphics(0,0);
             box.lineStyle(8, 0xFF0000, 0.8);
             box.beginFill(0xFF700B, 1);
             box.drawRect(-7, -7, 7, 7);
             box.endFill();
 
-            //  The first parameter is the tileset name, as specified in the Tiled map editor (and in the tilemap json file)
-            //  The second parameter maps this name to the Phaser.Cache key 'tiles'
             map.addTilesetImage('biomechamorphs_001', 'tiles');
-            
-            //  Creates a layer from the World1 layer in the map data.
-            //  A Layer is effectively like a Phaser.Sprite, so is added to the display list.
-            var layer = map.createLayer('Tile Layer 1');
+            map.setCollision(403);
+            map.setCollision(404);
+            map.setCollision(2684354964);
+            //var background = map.createLayer('background');
+            this.walls = map.createLayer('walls');
 
-            //  This resizes the game world to match the layer dimensions
-            layer.resizeWorld();
+            //background.resizeWorld();
+            this.walls.resizeWorld();
+            // this.physics.enable(walls);
+            console.log(map);
+            console.log(this.walls);
 
             var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
-            player.anchor.set(0.5);
+            //player.anchor.set(0.5);
             this.game.add.existing(player);
+            this.physics.enable(player);
+            this.physics.arcade.gravity.y = 0;
+            player.body.collideWorldBounds = true;
             this.players = this.add.group();
             this.players.add(player);
+            this.p = player;
 
             player.controller = new InputController(player, this, {
                 left: Phaser.KeyCode.LEFT,
@@ -44,12 +52,19 @@ module GhostMansion {
             }, () => { console.log('action'); } );
 
             this.ghost = this.add.sprite(this.world.centerX, this.world.centerY, box.generateTexture());
+            this.physics.enable(this.ghost);
         }
 
         update() {
+            //this.physics.arcade.collide(this.players, this.walls);
+            //this.physics.arcade.collide(this.players, this.ghost);
+            //this.physics.arcade.collide(this.ghost, this.walls);
+
             this.players.forEachAlive((controllable) => {
+                this.physics.arcade.collide(controllable, this.walls);
                 controllable.controller.update();
             }, this);
+            this.physics.arcade.collide(this.p, this.walls);
         }
     }
 }
