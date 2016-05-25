@@ -4,8 +4,10 @@ module GhostMansion {
     export class AiController {
         private path: any[];
         private step: number;
+        private debugLine: any;
 
         constructor(private sprite, private game) {
+            this.debugLine = this.game.add.graphics(0, 0);
             this.updatePath();
         }
 
@@ -32,12 +34,24 @@ module GhostMansion {
         }
 
         updatePath() {
-            this.path = this.bfs().path;
+            this.path = this.bfs(() => {
+                this.game.time.events.add(Phaser.Timer.SECOND*4, this.updatePath, this);
+            }).path;
             this.step = 0;
-            this.game.time.events.add(Phaser.Timer.SECOND, this.updatePath, this);
+
+            if (this.debugLine) {
+                var worldPath = this.path.map((p) => { return this.tileMapPos2WordPos(p); });
+                this.debugLine.clear();
+                this.debugLine.lineStyle(3, 0xffd900, 0.5);
+                this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
+                for (var i = 1; i < worldPath.length; i++) {
+                    this.debugLine.lineTo(worldPath[i].x, worldPath[i].y);
+                }
+            }
         }
 
-        bfs() {
+        bfs(callback) {
+            console.log('bfs');
             var myTile = this.getTile(this.sprite);
             var targetTiles = [];
             this.game.controllables.forEachAlive((controllable) =>{
@@ -74,6 +88,7 @@ module GhostMansion {
 
                         for (var k = 0; k < targetTiles.length; k++){
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
+                                if (callback) callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
                             }
                         }
@@ -89,6 +104,7 @@ module GhostMansion {
             var id = prevTile[this.tile2id(reached)];
             while (id != -1) {
                 if (id === undefined) {
+                    console.log(prevTile);
                     throw 'No path';
                 }
 

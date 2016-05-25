@@ -63,6 +63,7 @@ var GhostMansion;
         function AiController(sprite, game) {
             this.sprite = sprite;
             this.game = game;
+            this.debugLine = this.game.add.graphics(0, 0);
             this.updatePath();
         }
         AiController.prototype.update = function () {
@@ -86,12 +87,24 @@ var GhostMansion;
             };
         };
         AiController.prototype.updatePath = function () {
-            this.path = this.bfs().path;
-            this.step = 0;
-            this.game.time.events.add(Phaser.Timer.SECOND, this.updatePath, this);
-        };
-        AiController.prototype.bfs = function () {
             var _this = this;
+            this.path = this.bfs(function () {
+                _this.game.time.events.add(Phaser.Timer.SECOND * 4, _this.updatePath, _this);
+            }).path;
+            var worldPath = this.path.map(function (p) {
+                return _this.tileMapPos2WordPos(p);
+            });
+            this.debugLine.clear();
+            this.debugLine.lineStyle(3, 0xffd900, 0.5);
+            this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
+            for (var i = 1; i < worldPath.length; i++) {
+                this.debugLine.lineTo(worldPath[i].x, worldPath[i].y);
+            }
+            this.step = 0;
+        };
+        AiController.prototype.bfs = function (callback) {
+            var _this = this;
+            console.log('bfs');
             var myTile = this.getTile(this.sprite);
             var targetTiles = [];
             this.game.controllables.forEachAlive(function (controllable) {
@@ -124,6 +137,8 @@ var GhostMansion;
                         }
                         for (var k = 0; k < targetTiles.length; k++) {
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
+                                if (callback)
+                                    callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
                             }
                         }
@@ -137,6 +152,7 @@ var GhostMansion;
             var id = prevTile[this.tile2id(reached)];
             while (id != -1) {
                 if (id === undefined) {
+                    console.log(prevTile);
                     throw 'No path';
                 }
                 path.push(this.id2pos(id));
