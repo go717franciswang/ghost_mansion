@@ -6,6 +6,7 @@
 module GhostMansion {
     export class Map1 extends Phaser.State {
         controllables: Phaser.Group;
+        map: Phaser.Tilemap;
         walls: Phaser.TilemapLayer;
 
         create() {
@@ -18,16 +19,14 @@ module GhostMansion {
             box.drawRect(-5, -5, 5, 5);
             box.endFill();
 
-            var map = this.add.tilemap('map');
-            map.addTilesetImage('biomechamorphs_001', 'tiles');
-            map.setCollision(404, true, 'walls');
-            var background = map.createLayer('background');
-            this.walls = map.createLayer('walls');
+            this.map = this.add.tilemap('map');
+            this.map.addTilesetImage('biomechamorphs_001', 'tiles');
+            this.map.setCollision(404, true, 'walls');
+            var background = this.map.createLayer('background');
+            this.walls = this.map.createLayer('walls');
 
             background.resizeWorld();
             this.walls.resizeWorld();
-            console.log(map);
-            console.log(this.walls);
 
             var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
             this.game.add.existing(player);
@@ -47,6 +46,7 @@ module GhostMansion {
             var ghost = new ControllableSprite(this.game, 0, 0, box.generateTexture());
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
+            ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
 
             ghost.controller = new AiController(ghost, this);
