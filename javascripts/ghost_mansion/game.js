@@ -56,16 +56,39 @@ var GhostMansion;
     }());
     GhostMansion.InputController = InputController;
 })(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     var AiController = (function () {
         function AiController(sprite, game) {
             this.sprite = sprite;
             this.game = game;
-            console.log(this.bfs());
+            this.updatePath();
         }
         AiController.prototype.update = function () {
-            this.sprite.body.velocity.y = 50;
+            var p0 = this.tileMapPos2WordPos(this.path[this.step]);
+            var p1 = this.tileMapPos2WordPos(this.path[this.step + 1]);
+            var p = p0;
+            if (p1 && Phaser.Math.distanceSq(this.sprite.x, this.sprite.y, p0.x, p0.y) < 5) {
+                this.step++;
+                p = p1;
+            }
+            var angle = Phaser.Math.angleBetween(this.sprite.x, this.sprite.y, p.x, p.y);
+            this.sprite.body.velocity.x = Math.cos(angle) * 50;
+            this.sprite.body.velocity.y = Math.sin(angle) * 50;
+        };
+        AiController.prototype.tileMapPos2WordPos = function (tilePos) {
+            if (tilePos === undefined)
+                return null;
+            return {
+                x: (tilePos.x + 0.5) * this.game.map.tileWidth,
+                y: (tilePos.y + 0.5) * this.game.map.tileHeight
+            };
+        };
+        AiController.prototype.updatePath = function () {
+            this.path = this.bfs().path;
+            this.step = 0;
+            this.game.time.events.add(Phaser.Timer.SECOND, this.updatePath, this);
         };
         AiController.prototype.bfs = function () {
             var _this = this;
@@ -176,6 +199,7 @@ var GhostMansion;
             background.resizeWorld();
             this.walls.resizeWorld();
             var player = new GhostMansion.ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
+            player.anchor.setTo(0.5);
             this.game.add.existing(player);
             this.physics.enable(player);
             player.body.collideWorldBounds = true;
@@ -189,11 +213,13 @@ var GhostMansion;
                 action: Phaser.KeyCode.ENTER
             }, function () { console.log('action'); });
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, box.generateTexture());
+            ghost.anchor.setTo(0.5);
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
             ghost.controller = new GhostMansion.AiController(ghost, this);
+            this.ghost = ghost;
         };
         Map1.prototype.update = function () {
             this.physics.arcade.collide(this.controllables, this.walls);
@@ -201,6 +227,9 @@ var GhostMansion;
             this.controllables.forEachAlive(function (controllable) {
                 controllable.controller.update();
             }, this);
+        };
+        Map1.prototype.render = function () {
+            this.game.debug.spriteInfo(this.ghost, 32, 32);
         };
         return Map1;
     }(Phaser.State));

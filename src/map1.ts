@@ -8,6 +8,7 @@ module GhostMansion {
         controllables: Phaser.Group;
         map: Phaser.Tilemap;
         walls: Phaser.TilemapLayer;
+        ghost: any;
 
         create() {
             this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -29,6 +30,7 @@ module GhostMansion {
             this.walls.resizeWorld();
 
             var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
+            player.anchor.setTo(0.5);
             this.game.add.existing(player);
             this.physics.enable(player);
             player.body.collideWorldBounds = true;
@@ -44,12 +46,14 @@ module GhostMansion {
             }, () => { console.log('action'); } );
 
             var ghost = new ControllableSprite(this.game, 0, 0, box.generateTexture());
+            ghost.anchor.setTo(0.5);
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
 
             ghost.controller = new AiController(ghost, this);
+            this.ghost = ghost;
         }
 
         update() {
@@ -59,6 +63,10 @@ module GhostMansion {
             this.controllables.forEachAlive((controllable) => {
                 controllable.controller.update();
             }, this);
+        }
+
+        render() {
+            this.game.debug.spriteInfo(this.ghost, 32, 32);
         }
     }
 }
