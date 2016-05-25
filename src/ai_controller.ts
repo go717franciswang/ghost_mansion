@@ -41,6 +41,7 @@ module GhostMansion {
 
             if (this.debugLine) {
                 var worldPath = this.path.map((p) => { return this.tileMapPos2WordPos(p); });
+                console.log(worldPath);
                 this.debugLine.clear();
                 this.debugLine.lineStyle(3, 0xffd900, 0.5);
                 this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
@@ -56,9 +57,11 @@ module GhostMansion {
             var targetTiles = [];
             this.game.controllables.forEachAlive((controllable) =>{
                 if (controllable != this.sprite) {
+                    console.log(controllable);
                     targetTiles.push(this.getTile(controllable));
                 }
             });
+            console.log(targetTiles);
 
             var edges = [myTile];
             var prevTile = {};
@@ -88,6 +91,7 @@ module GhostMansion {
 
                         for (var k = 0; k < targetTiles.length; k++){
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
+                                console.log(tile);
                                 if (callback) callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
                             }
@@ -126,6 +130,7 @@ module GhostMansion {
         }
 
         getTile(sprite) {
+            // TODO: it's not returning the correct tile
             var m = this.game.map;
             return m.getTileWorldXY(sprite.x, sprite.y, m.width, m.height, this.game.walls, true);
         }

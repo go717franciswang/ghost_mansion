@@ -91,16 +91,17 @@ var GhostMansion;
             this.path = this.bfs(function () {
                 _this.game.time.events.add(Phaser.Timer.SECOND * 4, _this.updatePath, _this);
             }).path;
-            var worldPath = this.path.map(function (p) {
-                return _this.tileMapPos2WordPos(p);
-            });
-            this.debugLine.clear();
-            this.debugLine.lineStyle(3, 0xffd900, 0.5);
-            this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
-            for (var i = 1; i < worldPath.length; i++) {
-                this.debugLine.lineTo(worldPath[i].x, worldPath[i].y);
-            }
             this.step = 0;
+            if (this.debugLine) {
+                var worldPath = this.path.map(function (p) { return _this.tileMapPos2WordPos(p); });
+                console.log(worldPath);
+                this.debugLine.clear();
+                this.debugLine.lineStyle(3, 0xffd900, 0.5);
+                this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
+                for (var i = 1; i < worldPath.length; i++) {
+                    this.debugLine.lineTo(worldPath[i].x, worldPath[i].y);
+                }
+            }
         };
         AiController.prototype.bfs = function (callback) {
             var _this = this;
@@ -109,9 +110,11 @@ var GhostMansion;
             var targetTiles = [];
             this.game.controllables.forEachAlive(function (controllable) {
                 if (controllable != _this.sprite) {
+                    console.log(controllable);
                     targetTiles.push(_this.getTile(controllable));
                 }
             });
+            console.log(targetTiles);
             var edges = [myTile];
             var prevTile = {};
             prevTile[this.tile2id(myTile)] = -1;
@@ -137,6 +140,7 @@ var GhostMansion;
                         }
                         for (var k = 0; k < targetTiles.length; k++) {
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
+                                console.log(tile);
                                 if (callback)
                                     callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
@@ -170,7 +174,7 @@ var GhostMansion;
         };
         AiController.prototype.getTile = function (sprite) {
             var m = this.game.map;
-            return m.getTileWorldXY(sprite.x, sprite.y, m.width, m.height, this.game.walls, true);
+            return m.getTileWorldXY(sprite.position.x, sprite.position.y, m.width, m.height, this.game.walls, true);
         };
         return AiController;
     }());
