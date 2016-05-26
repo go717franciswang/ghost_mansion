@@ -64,6 +64,7 @@ var GhostMansion;
             this.sprite = sprite;
             this.game = game;
             this.debugLine = this.game.add.graphics(0, 0);
+            this.step = 0;
             this.updatePath();
         }
         AiController.prototype.update = function () {
@@ -88,13 +89,15 @@ var GhostMansion;
         };
         AiController.prototype.updatePath = function () {
             var _this = this;
-            this.path = this.bfs(function () {
-                _this.game.time.events.add(Phaser.Timer.SECOND * 4, _this.updatePath, _this);
-            }).path;
-            this.step = 0;
+            var newPath = this.bfs().path;
+            if (this.path && this.path[this.step] != newPath[0])
+                this.step = 0;
+            if (this.path && this.path[this.step] == newPath[1])
+                this.step = 1;
+            this.path = newPath;
+            this.game.time.events.add(Phaser.Timer.SECOND * 1, this.updatePath, this);
             if (this.debugLine) {
                 var worldPath = this.path.map(function (p) { return _this.tileMapPos2WordPos(p); });
-                console.log(worldPath);
                 this.debugLine.clear();
                 this.debugLine.lineStyle(3, 0xffd900, 0.5);
                 this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
@@ -103,18 +106,15 @@ var GhostMansion;
                 }
             }
         };
-        AiController.prototype.bfs = function (callback) {
+        AiController.prototype.bfs = function () {
             var _this = this;
-            console.log('bfs');
             var myTile = this.getTile(this.sprite);
             var targetTiles = [];
             this.game.controllables.forEachAlive(function (controllable) {
                 if (controllable != _this.sprite) {
-                    console.log(controllable);
                     targetTiles.push(_this.getTile(controllable));
                 }
             });
-            console.log(targetTiles);
             var edges = [myTile];
             var prevTile = {};
             prevTile[this.tile2id(myTile)] = -1;
@@ -140,9 +140,6 @@ var GhostMansion;
                         }
                         for (var k = 0; k < targetTiles.length; k++) {
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
-                                console.log(tile);
-                                if (callback)
-                                    callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
                             }
                         }
@@ -153,10 +150,9 @@ var GhostMansion;
         };
         AiController.prototype.computePath = function (reached, prevTile) {
             var path = [];
-            var id = prevTile[this.tile2id(reached)];
+            var id = this.tile2id(reached);
             while (id != -1) {
                 if (id === undefined) {
-                    console.log(prevTile);
                     throw 'No path';
                 }
                 path.push(this.id2pos(id));
@@ -174,7 +170,7 @@ var GhostMansion;
         };
         AiController.prototype.getTile = function (sprite) {
             var m = this.game.map;
-            return m.getTileWorldXY(sprite.position.x, sprite.position.y, m.width, m.height, this.game.walls, true);
+            return m.getTileWorldXY(sprite.x, sprite.y, m.tileWidth, m.tileHeight, this.game.walls, true);
         };
         return AiController;
     }());
@@ -242,14 +238,14 @@ var GhostMansion;
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {
-            this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables);
             this.controllables.forEachAlive(function (controllable) {
                 controllable.controller.update();
             }, this);
+            this.physics.arcade.collide(this.controllables, this.walls);
+            this.physics.arcade.collide(this.controllables, this.controllables);
         };
         Map1.prototype.render = function () {
-            this.game.debug.spriteInfo(this.ghost, 32, 32);
+            // this.game.debug.spriteInfo(this.ghost, 32, 32);
         };
         return Map1;
     }(Phaser.State));

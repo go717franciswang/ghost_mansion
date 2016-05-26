@@ -8,6 +8,7 @@ module GhostMansion {
 
         constructor(private sprite, private game) {
             this.debugLine = this.game.add.graphics(0, 0);
+            this.step = 0;
             this.updatePath();
         }
 
@@ -34,14 +35,13 @@ module GhostMansion {
         }
 
         updatePath() {
-            this.path = this.bfs(() => {
-                this.game.time.events.add(Phaser.Timer.SECOND*4, this.updatePath, this);
-            }).path;
-            this.step = 0;
+            var newPath = this.bfs().path;
+            if (this.path && this.path[this.step] != newPath[0]) this.step = 0;
+            this.path = newPath;
+            this.game.time.events.add(Phaser.Timer.SECOND*1, this.updatePath, this);
 
             if (this.debugLine) {
                 var worldPath = this.path.map((p) => { return this.tileMapPos2WordPos(p); });
-                console.log(worldPath);
                 this.debugLine.clear();
                 this.debugLine.lineStyle(3, 0xffd900, 0.5);
                 this.debugLine.moveTo(worldPath[0].x, worldPath[1]);
@@ -51,17 +51,14 @@ module GhostMansion {
             }
         }
 
-        bfs(callback) {
-            console.log('bfs');
+        bfs() {
             var myTile = this.getTile(this.sprite);
             var targetTiles = [];
             this.game.controllables.forEachAlive((controllable) =>{
                 if (controllable != this.sprite) {
-                    console.log(controllable);
                     targetTiles.push(this.getTile(controllable));
                 }
             });
-            console.log(targetTiles);
 
             var edges = [myTile];
             var prevTile = {};
@@ -91,8 +88,6 @@ module GhostMansion {
 
                         for (var k = 0; k < targetTiles.length; k++){
                             if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
-                                console.log(tile);
-                                if (callback) callback();
                                 return { reached: tile, path: this.computePath(tile, prevTile) };
                             }
                         }
@@ -105,10 +100,9 @@ module GhostMansion {
 
         computePath(reached, prevTile) {
             var path = [];
-            var id = prevTile[this.tile2id(reached)];
+            var id = this.tile2id(reached);
             while (id != -1) {
                 if (id === undefined) {
-                    console.log(prevTile);
                     throw 'No path';
                 }
 
@@ -130,9 +124,8 @@ module GhostMansion {
         }
 
         getTile(sprite) {
-            // TODO: it's not returning the correct tile
             var m = this.game.map;
-            return m.getTileWorldXY(sprite.x, sprite.y, m.width, m.height, this.game.walls, true);
+            return m.getTileWorldXY(sprite.x, sprite.y, m.tileWidth, m.tileHeight, this.game.walls, true);
         }
     }
 }

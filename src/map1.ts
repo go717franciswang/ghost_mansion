@@ -57,16 +57,16 @@ module GhostMansion {
         }
 
         update() {
-            this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables);
-
             this.controllables.forEachAlive((controllable) => {
                 controllable.controller.update();
             }, this);
+
+            this.physics.arcade.collide(this.controllables, this.walls);
+            this.physics.arcade.collide(this.controllables, this.controllables);
         }
 
         render() {
-            this.game.debug.spriteInfo(this.ghost, 32, 32);
+            // this.game.debug.spriteInfo(this.ghost, 32, 32);
         }
     }
 }
