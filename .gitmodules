@@ -1,0 +1,3 @@
+[submodule "javascripts/ghost_mansion/visibility-polygon-js"]
+	path = javascripts/ghost_mansion/visibility-polygon-js
+	url = git@github.com:byronknoll/visibility-polygon-js.git

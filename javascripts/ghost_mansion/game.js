@@ -264,3 +264,17 @@ var GhostMansion;
     }
     GhostMansion.startGame = startGame;
 })(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./visibility_polygon.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var FlashLight = (function () {
+        function FlashLight(playerSprite, game) {
+            this.playerSprite = playerSprite;
+            this.game = game;
+            // TODO: http://www.emanueleferonato.com/2015/02/03/play-with-light-and-dark-using-ray-casting-and-visibility-polygons/
+        }
+        return FlashLight;
+    }());
+    GhostMansion.FlashLight = FlashLight;
+})(GhostMansion || (GhostMansion = {}));
