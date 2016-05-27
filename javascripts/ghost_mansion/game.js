@@ -91,10 +91,10 @@ var GhostMansion;
             var _this = this;
             var newPath = this.bfs().path;
             if (this.path && this.path[this.step] != newPath[0])
-                this.step = 0;
-            if (this.path && this.path[this.step] == newPath[1])
                 this.step = 1;
             this.path = newPath;
+            if (this.path.length == 1)
+                this.step = 0; // in case target is in the same tile
             this.game.time.events.add(Phaser.Timer.SECOND * 1, this.updatePath, this);
             if (this.debugLine) {
                 var worldPath = this.path.map(function (p) { return _this.tileMapPos2WordPos(p); });
@@ -123,6 +123,11 @@ var GhostMansion;
                 for (var i = 0; i < edges.length; i++) {
                     var e = edges[i];
                     var id = this.tile2id(e);
+                    for (var j = 0; j < targetTiles.length; j++) {
+                        if (targetTiles[j].x == e.x && targetTiles[j].y == e.y) {
+                            return { reached: e, path: this.computePath(e, prevTile) };
+                        }
+                    }
                     var tiles = [
                         this.game.map.getTileAbove(this.game.walls.index, e.x, e.y),
                         this.game.map.getTileBelow(this.game.walls.index, e.x, e.y),
@@ -137,11 +142,6 @@ var GhostMansion;
                         if (prevTile[tileId] === undefined && tile.index != 404) {
                             prevTile[tileId] = id;
                             newEdges.push(tile);
-                        }
-                        for (var k = 0; k < targetTiles.length; k++) {
-                            if (targetTiles[k].x == tile.x && targetTiles[k].y == tile.y) {
-                                return { reached: tile, path: this.computePath(tile, prevTile) };
-                            }
                         }
                     }
                 }
