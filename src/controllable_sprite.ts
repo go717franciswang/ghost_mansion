@@ -2,14 +2,14 @@
 
 module GhostMansion {
     export class ControllableSprite extends Phaser.Sprite {
-        public components = {};
+        public behaviors = {};
 
-        setComponent(key, component) {
-            this.components[key] = component;
+        setBehavior(key, behavior) {
+            this.behaviors[key] = behavior;
         }
 
-        getComponent(key) {
-            return this.components[key];
+        getBehavior(key) {
+            return this.behaviors[key];
         }
     }
 }

@@ -37,7 +37,7 @@ module GhostMansion {
             this.controllables = this.add.group();
             this.controllables.add(player);
 
-            player.setComponent('inputController', new InputController(player, this, {
+            player.setBehavior('inputController', new InputController(player, this, {
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
@@ -52,14 +52,18 @@ module GhostMansion {
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
 
-            ghost.setComponent('AI', new AiController(ghost, this));
+            ghost.setBehavior('AI', new AiController(ghost, this));
             this.ghost = ghost;
         }
 
         update() {
             this.controllables.forEachAlive((controllable) => {
-                for (var key in controllable.components) {
-                    controllable.components[key].update();
+                for (var key in controllable.behaviors) {
+                    try {
+                        controllable.behaviors[key].update();
+                    } catch(e) {
+                        console.error(e);
+                    }
                 }
             }, this);
 

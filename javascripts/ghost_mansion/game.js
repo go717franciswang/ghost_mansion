@@ -37,7 +37,6 @@ var GhostMansion;
             this.sprite.body.velocity.x = 0;
             this.sprite.body.velocity.y = 0;
             if (this.game.input.keyboard.isDown(this.keyMap.left)) {
-                console.log('left');
                 this.sprite.body.velocity.x = -this.velocity;
             }
             else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
@@ -64,7 +63,7 @@ var GhostMansion;
         function AiController(sprite, game) {
             this.sprite = sprite;
             this.game = game;
-            this.debugLine = this.game.add.graphics(0, 0);
+            // this.debugLine = this.game.add.graphics(0, 0);
             this.step = 0;
             this.updatePath();
         }
@@ -184,13 +183,13 @@ var GhostMansion;
         __extends(ControllableSprite, _super);
         function ControllableSprite() {
             _super.apply(this, arguments);
-            this.components = {};
+            this.behaviors = {};
         }
-        ControllableSprite.prototype.setComponent = function (key, component) {
-            this.components[key] = component;
+        ControllableSprite.prototype.setBehavior = function (key, behavior) {
+            this.behaviors[key] = behavior;
         };
-        ControllableSprite.prototype.getComponent = function (key) {
-            return this.components[key];
+        ControllableSprite.prototype.getBehavior = function (key) {
+            return this.behaviors[key];
         };
         return ControllableSprite;
     }(Phaser.Sprite));
@@ -229,7 +228,7 @@ var GhostMansion;
             player.body.collideWorldBounds = true;
             this.controllables = this.add.group();
             this.controllables.add(player);
-            player.setComponent('inputController', new GhostMansion.InputController(player, this, {
+            player.setBehavior('inputController', new GhostMansion.InputController(player, this, {
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
@@ -242,13 +241,18 @@ var GhostMansion;
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
-            ghost.setComponent('AI', new GhostMansion.AiController(ghost, this));
+            ghost.setBehavior('AI', new GhostMansion.AiController(ghost, this));
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {
             this.controllables.forEachAlive(function (controllable) {
-                for (var key in controllable.components) {
-                    controllable.components[key].update();
+                for (var key in controllable.behaviors) {
+                    try {
+                        controllable.behaviors[key].update();
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
                 }
             }, this);
             this.physics.arcade.collide(this.controllables, this.walls);

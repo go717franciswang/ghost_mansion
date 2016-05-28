@@ -7,7 +7,7 @@ module GhostMansion {
         private debugLine: any;
 
         constructor(private sprite, private game) {
-            this.debugLine = this.game.add.graphics(0, 0);
+            // this.debugLine = this.game.add.graphics(0, 0);
             this.step = 0;
             this.updatePath();
         }
