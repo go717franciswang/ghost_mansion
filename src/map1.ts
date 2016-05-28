@@ -1,6 +1,7 @@
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./input_controller.ts"/>
 /// <reference path="./ai_controller.ts"/>
+/// <reference path="./flashlight.ts"/>
 /// <reference path="./controllable_sprite.ts"/>
 
 module GhostMansion {
@@ -44,6 +45,8 @@ module GhostMansion {
                 down: Phaser.KeyCode.DOWN,
                 action: Phaser.KeyCode.ENTER
             }, () => { console.log('action'); } ));
+
+            player.setBehavior('flashlight', new FlashLight(player, this));
 
             var ghost = new ControllableSprite(this.game, 0, 0, box.generateTexture());
             ghost.anchor.setTo(0.5);
