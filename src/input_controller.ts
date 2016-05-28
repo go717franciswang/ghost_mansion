@@ -19,6 +19,7 @@ module GhostMansion {
             this.sprite.body.velocity.y = 0;
 
             if (this.game.input.keyboard.isDown(this.keyMap.left)) {
+                console.log('left');
                 this.sprite.body.velocity.x = -this.velocity;
             } else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
                 this.sprite.body.velocity.x = this.velocity;

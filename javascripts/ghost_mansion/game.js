@@ -37,6 +37,7 @@ var GhostMansion;
             this.sprite.body.velocity.x = 0;
             this.sprite.body.velocity.y = 0;
             if (this.game.input.keyboard.isDown(this.keyMap.left)) {
+                console.log('left');
                 this.sprite.body.velocity.x = -this.velocity;
             }
             else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
@@ -183,7 +184,14 @@ var GhostMansion;
         __extends(ControllableSprite, _super);
         function ControllableSprite() {
             _super.apply(this, arguments);
+            this.components = {};
         }
+        ControllableSprite.prototype.setComponent = function (key, component) {
+            this.components[key] = component;
+        };
+        ControllableSprite.prototype.getComponent = function (key) {
+            return this.components[key];
+        };
         return ControllableSprite;
     }(Phaser.Sprite));
     GhostMansion.ControllableSprite = ControllableSprite;
@@ -221,25 +229,27 @@ var GhostMansion;
             player.body.collideWorldBounds = true;
             this.controllables = this.add.group();
             this.controllables.add(player);
-            player.controller = new GhostMansion.InputController(player, this, {
+            player.setComponent('inputController', new GhostMansion.InputController(player, this, {
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
                 action: Phaser.KeyCode.ENTER
-            }, function () { console.log('action'); });
+            }, function () { console.log('action'); }));
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, box.generateTexture());
             ghost.anchor.setTo(0.5);
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
-            ghost.controller = new GhostMansion.AiController(ghost, this);
+            ghost.setComponent('AI', new GhostMansion.AiController(ghost, this));
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {
             this.controllables.forEachAlive(function (controllable) {
-                controllable.controller.update();
+                for (var key in controllable.components) {
+                    controllable.components[key].update();
+                }
             }, this);
             this.physics.arcade.collide(this.controllables, this.walls);
             this.physics.arcade.collide(this.controllables, this.controllables);
@@ -273,6 +283,12 @@ var GhostMansion;
             this.playerSprite = playerSprite;
             this.game = game;
             // TODO: http://www.emanueleferonato.com/2015/02/03/play-with-light-and-dark-using-ray-casting-and-visibility-polygons/
+            this.polygons = [];
+            this.polygons.push([[0, 0], [this.game.width, 0], [this.game.width, this.game.height], [0, this.game.height]]);
+            var m = this.game.map;
+            m.forEach(function (tile) {
+                console.log(tile);
+            }, 0, 0, m.width, m.height, this.game.walls);
         }
         return FlashLight;
     }());

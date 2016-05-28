@@ -37,13 +37,13 @@ module GhostMansion {
             this.controllables = this.add.group();
             this.controllables.add(player);
 
-            player.controller = new InputController(player, this, {
+            player.setComponent('inputController', new InputController(player, this, {
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
                 action: Phaser.KeyCode.ENTER
-            }, () => { console.log('action'); } );
+            }, () => { console.log('action'); } ));
 
             var ghost = new ControllableSprite(this.game, 0, 0, box.generateTexture());
             ghost.anchor.setTo(0.5);
@@ -52,13 +52,15 @@ module GhostMansion {
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
 
-            ghost.controller = new AiController(ghost, this);
+            ghost.setComponent('AI', new AiController(ghost, this));
             this.ghost = ghost;
         }
 
         update() {
             this.controllables.forEachAlive((controllable) => {
-                controllable.controller.update();
+                for (var key in controllable.components) {
+                    controllable.components[key].update();
+                }
             }, this);
 
             this.physics.arcade.collide(this.controllables, this.walls);
