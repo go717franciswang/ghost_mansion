@@ -36,17 +36,19 @@ var GhostMansion;
         InputController.prototype.update = function () {
             this.sprite.body.velocity.x = 0;
             this.sprite.body.velocity.y = 0;
+            var vx = 0;
+            var vy = 0;
             if (this.game.input.keyboard.isDown(this.keyMap.left)) {
-                this.sprite.body.velocity.x = -this.velocity;
+                vx = -this.velocity;
             }
             else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
-                this.sprite.body.velocity.x = this.velocity;
+                vx = this.velocity;
             }
             if (this.game.input.keyboard.isDown(this.keyMap.up)) {
-                this.sprite.body.velocity.y = -this.velocity;
+                vy = -this.velocity;
             }
             else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
-                this.sprite.body.velocity.y = this.velocity;
+                vy = this.velocity;
             }
             if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
                 this.sprite.getBehavior('flashlight').turnOn();
@@ -54,6 +56,7 @@ var GhostMansion;
             else {
                 this.sprite.getBehavior('flashlight').turnOff();
             }
+            this.sprite.move(vx, vy);
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
                 if (v.x == 0) {
@@ -93,8 +96,7 @@ var GhostMansion;
                 p = p1;
             }
             var angle = Phaser.Math.angleBetween(this.sprite.x, this.sprite.y, p.x, p.y);
-            this.sprite.body.velocity.x = Math.cos(angle) * 50;
-            this.sprite.body.velocity.y = Math.sin(angle) * 50;
+            this.sprite.move(Math.cos(angle) * 50, Math.sin(angle) * 50);
         };
         AiController.prototype.tileMapPos2WordPos = function (tilePos) {
             if (tilePos === undefined)
@@ -253,6 +255,7 @@ var GhostMansion;
                 this.health -= this.game.time.physicsElapsed * 10;
                 var g = this.game.ghost;
                 if (VisibilityPolygon.inPolygon([g.x, g.y], visibility)) {
+                    g.stun(3);
                     g.deductHealth(this.game.time.physicsElapsed * 30);
                 }
             }
@@ -277,6 +280,7 @@ var GhostMansion;
             this.behaviors = {};
             this.health = 100;
             this.tag = 'human';
+            this.stunned = false;
         }
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
@@ -288,6 +292,26 @@ var GhostMansion;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;
+        };
+        ControllableSprite.prototype.stun = function (seconds) {
+            var _this = this;
+            if (this.stunned)
+                return;
+            console.log('stunned');
+            this.stunned = true;
+            this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
+                _this.stunned = false;
+            }, this);
+        };
+        ControllableSprite.prototype.move = function (vx, vy) {
+            if (this.stunned) {
+                this.body.velocity.x = 0;
+                this.body.velocity.y = 0;
+            }
+            else {
+                this.body.velocity.x = vx;
+                this.body.velocity.y = vy;
+            }
         };
         return ControllableSprite;
     }(Phaser.Sprite));

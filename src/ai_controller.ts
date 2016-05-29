@@ -22,8 +22,7 @@ module GhostMansion {
             }
 
             var angle = Phaser.Math.angleBetween(this.sprite.x, this.sprite.y, p.x, p.y);
-            this.sprite.body.velocity.x = Math.cos(angle)*50;
-            this.sprite.body.velocity.y = Math.sin(angle)*50;
+            this.sprite.move(Math.cos(angle)*50, Math.sin(angle)*50);
         }
 
         tileMapPos2WordPos(tilePos) {

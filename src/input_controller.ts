@@ -20,16 +20,18 @@ module GhostMansion {
             this.sprite.body.velocity.x = 0;
             this.sprite.body.velocity.y = 0;
 
+            var vx = 0;
+            var vy = 0;
             if (this.game.input.keyboard.isDown(this.keyMap.left)) {
-                this.sprite.body.velocity.x = -this.velocity;
+                vx = -this.velocity;
             } else if (this.game.input.keyboard.isDown(this.keyMap.right)) {
-                this.sprite.body.velocity.x = this.velocity;
+                vx = this.velocity;
             }
 
             if (this.game.input.keyboard.isDown(this.keyMap.up)) {
-                this.sprite.body.velocity.y = -this.velocity;
+                vy = -this.velocity;
             } else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
-                this.sprite.body.velocity.y = this.velocity;
+                vy = this.velocity;
             }
 
             if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
@@ -37,6 +39,8 @@ module GhostMansion {
             } else {
                 this.sprite.getBehavior('flashlight').turnOff();
             }
+
+            this.sprite.move(vx, vy);
 
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
