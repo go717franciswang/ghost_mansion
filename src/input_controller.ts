@@ -9,9 +9,11 @@ module GhostMansion {
 
     export class InputController {
         velocity: number;
+        direction;
 
         constructor(private sprite, private game, private keyMap: KeyMap, private action: ()=>void) {
             this.velocity = 100;
+            this.direction = Math.PI/2;
         }
 
         update() {
@@ -32,6 +34,17 @@ module GhostMansion {
 
             if (this.game.input.keyboard.isDown(this.keyMap.action)) {
                 this.action();
+            }
+
+            var v = this.sprite.body.velocity;
+            if (v.x != 0 || v.y != 0) {
+                if (v.x == 0) {
+                    if (v.y > 0) this.direction = Math.PI/2;
+                    else this.direction = -Math.PI/2;
+                } else {
+                    if (v.y == 0 && v.x < 0) this.direction = Math.PI;
+                    else this.direction = Math.atan(v.y/v.x);
+                }
             }
         }
     }

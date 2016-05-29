@@ -6,6 +6,7 @@ module GhostMansion {
         private polygons;
         private segments;
         private lightCanvas;
+        private inputController;
 
         constructor(private sprite, private game) {
             // Reference: http://www.emanueleferonato.com/2015/02/03/play-with-light-and-dark-using-ray-casting-and-visibility-polygons/
@@ -31,9 +32,11 @@ module GhostMansion {
             this.segments = VisibilityPolygon.convertToSegments(this.polygons);
 
             this.lightCanvas = this.game.add.graphics(0, 0);
+            this.inputController = this.sprite.getBehavior('inputController');
         }
 
         update() {
+            console.log(this.inputController.direction);
             var position = [this.sprite.x, this.sprite.y];
             var visibility = VisibilityPolygon.compute(position, this.segments);
             this.lightCanvas.clear();

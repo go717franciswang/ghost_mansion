@@ -32,6 +32,7 @@ var GhostMansion;
             this.keyMap = keyMap;
             this.action = action;
             this.velocity = 100;
+            this.direction = Math.PI / 2;
         }
         InputController.prototype.update = function () {
             this.sprite.body.velocity.x = 0;
@@ -50,6 +51,21 @@ var GhostMansion;
             }
             if (this.game.input.keyboard.isDown(this.keyMap.action)) {
                 this.action();
+            }
+            var v = this.sprite.body.velocity;
+            if (v.x != 0 || v.y != 0) {
+                if (v.x == 0) {
+                    if (v.y > 0)
+                        this.direction = Math.PI / 2;
+                    else
+                        this.direction = -Math.PI / 2;
+                }
+                else {
+                    if (v.y == 0 && v.x < 0)
+                        this.direction = Math.PI;
+                    else
+                        this.direction = Math.atan(v.y / v.x);
+                }
             }
         };
         return InputController;
@@ -207,8 +223,10 @@ var GhostMansion;
             console.log(this.polygons);
             this.segments = VisibilityPolygon.convertToSegments(this.polygons);
             this.lightCanvas = this.game.add.graphics(0, 0);
+            this.inputController = this.sprite.getBehavior('inputController');
         }
         FlashLight.prototype.update = function () {
+            console.log(this.inputController.direction);
             var position = [this.sprite.x, this.sprite.y];
             var visibility = VisibilityPolygon.compute(position, this.segments);
             this.lightCanvas.clear();
