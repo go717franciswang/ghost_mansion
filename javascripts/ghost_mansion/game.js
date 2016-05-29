@@ -26,11 +26,10 @@ var GhostMansion;
 var GhostMansion;
 (function (GhostMansion) {
     var InputController = (function () {
-        function InputController(sprite, game, keyMap, action) {
+        function InputController(sprite, game, keyMap) {
             this.sprite = sprite;
             this.game = game;
             this.keyMap = keyMap;
-            this.action = action;
             this.velocity = 100;
             this.direction = Math.PI / 2;
         }
@@ -49,8 +48,11 @@ var GhostMansion;
             else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
                 this.sprite.body.velocity.y = this.velocity;
             }
-            if (this.game.input.keyboard.isDown(this.keyMap.action)) {
-                this.action();
+            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
+                this.sprite.getBehavior('flashlight').turnOn();
+            }
+            else {
+                this.sprite.getBehavior('flashlight').turnOff();
             }
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
@@ -200,6 +202,8 @@ var GhostMansion;
             var _this = this;
             this.sprite = sprite;
             this.game = game;
+            this.activated = false;
+            this.health = 100;
             // Reference: http://www.emanueleferonato.com/2015/02/03/play-with-light-and-dark-using-ray-casting-and-visibility-polygons/
             this.polygons = [];
             this.polygons.push([
@@ -227,23 +231,32 @@ var GhostMansion;
             var a = this.inputController.direction;
             var rayWidth = 0.7;
             var rayLength = 70;
-            this.polygons[0] = [
-                // make sure ray begins behind origin
-                [this.sprite.x - Math.cos(a) * 5, this.sprite.y - Math.sin(a) * 5],
-                [this.sprite.x + Math.cos(a + rayWidth) * rayLength, this.sprite.y + Math.sin(a + rayWidth) * rayLength],
-                [this.sprite.x + Math.cos(a - rayWidth) * rayLength, this.sprite.y + Math.sin(a - rayWidth) * rayLength]
-            ];
-            this.segments = VisibilityPolygon.convertToSegments(this.polygons);
-            // this.segments = VisibilityPolygon.breakIntersections(this.segments); // very slow
-            var visibility = VisibilityPolygon.compute(position, this.segments);
             this.lightCanvas.clear();
-            this.lightCanvas.lineStyle(2, 0xff8800, 0);
-            this.lightCanvas.beginFill(0xffff00, 0.5);
-            this.lightCanvas.moveTo(visibility[0][0], visibility[0][1]);
-            for (var i = 1; i < visibility.length; i++) {
-                this.lightCanvas.lineTo(visibility[i][0], visibility[i][1]);
+            if (this.activated && this.health > 0) {
+                this.polygons[0] = [
+                    // make sure ray begins behind origin
+                    [this.sprite.x - Math.cos(a) * 5, this.sprite.y - Math.sin(a) * 5],
+                    [this.sprite.x + Math.cos(a + rayWidth) * rayLength, this.sprite.y + Math.sin(a + rayWidth) * rayLength],
+                    [this.sprite.x + Math.cos(a - rayWidth) * rayLength, this.sprite.y + Math.sin(a - rayWidth) * rayLength]
+                ];
+                this.segments = VisibilityPolygon.convertToSegments(this.polygons);
+                // this.segments = VisibilityPolygon.breakIntersections(this.segments); // very slow
+                var visibility = VisibilityPolygon.compute(position, this.segments);
+                this.lightCanvas.lineStyle(2, 0xff8800, 0);
+                this.lightCanvas.beginFill(0xffff00, 0.5);
+                this.lightCanvas.moveTo(visibility[0][0], visibility[0][1]);
+                for (var i = 1; i < visibility.length; i++) {
+                    this.lightCanvas.lineTo(visibility[i][0], visibility[i][1]);
+                }
+                this.lightCanvas.endFill();
+                this.health -= this.game.time.physicsElapsed * 10;
             }
-            this.lightCanvas.endFill();
+        };
+        FlashLight.prototype.turnOn = function () {
+            this.activated = true;
+        };
+        FlashLight.prototype.turnOff = function () {
+            this.activated = false;
         };
         return FlashLight;
     }());
@@ -257,6 +270,7 @@ var GhostMansion;
         function ControllableSprite() {
             _super.apply(this, arguments);
             this.behaviors = {};
+            this.health = 100;
         }
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
@@ -307,8 +321,8 @@ var GhostMansion;
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
-                action: Phaser.KeyCode.ENTER
-            }, function () { console.log('action'); }));
+                flashlight: Phaser.KeyCode.ENTER
+            }));
             player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, box.generateTexture());
             ghost.anchor.setTo(0.5);

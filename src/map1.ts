@@ -43,8 +43,8 @@ module GhostMansion {
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
-                action: Phaser.KeyCode.ENTER
-            }, () => { console.log('action'); } ));
+                flashlight: Phaser.KeyCode.ENTER
+            }));
 
             player.setBehavior('flashlight', new FlashLight(player, this));
 

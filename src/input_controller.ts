@@ -4,14 +4,14 @@ module GhostMansion {
         right: number;
         up: number;
         down: number;
-        action: number;
+        flashlight: number;
     }
 
     export class InputController {
         velocity: number;
         direction;
 
-        constructor(private sprite, private game, private keyMap: KeyMap, private action: ()=>void) {
+        constructor(private sprite, private game, private keyMap: KeyMap) {
             this.velocity = 100;
             this.direction = Math.PI/2;
         }
@@ -32,8 +32,10 @@ module GhostMansion {
                 this.sprite.body.velocity.y = this.velocity;
             }
 
-            if (this.game.input.keyboard.isDown(this.keyMap.action)) {
-                this.action();
+            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
+                this.sprite.getBehavior('flashlight').turnOn();
+            } else {
+                this.sprite.getBehavior('flashlight').turnOff();
             }
 
             var v = this.sprite.body.velocity;
