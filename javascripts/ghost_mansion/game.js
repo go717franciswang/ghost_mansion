@@ -243,13 +243,18 @@ var GhostMansion;
                 // this.segments = VisibilityPolygon.breakIntersections(this.segments); // very slow
                 var visibility = VisibilityPolygon.compute(position, this.segments);
                 this.lightCanvas.lineStyle(2, 0xff8800, 0);
-                this.lightCanvas.beginFill(0xffff00, 0.5 * (1 - Math.exp(-this.health / 10)));
+                var lightIntensity = 0.5 * (1 - Math.exp(-this.health / 10));
+                this.lightCanvas.beginFill(0xffff00, lightIntensity);
                 this.lightCanvas.moveTo(visibility[0][0], visibility[0][1]);
                 for (var i = 1; i < visibility.length; i++) {
                     this.lightCanvas.lineTo(visibility[i][0], visibility[i][1]);
                 }
                 this.lightCanvas.endFill();
                 this.health -= this.game.time.physicsElapsed * 10;
+                var g = this.game.ghost;
+                if (VisibilityPolygon.inPolygon([g.x, g.y], visibility)) {
+                    g.deductHealth(this.game.time.physicsElapsed * 30);
+                }
             }
         };
         FlashLight.prototype.turnOn = function () {
@@ -277,6 +282,12 @@ var GhostMansion;
         };
         ControllableSprite.prototype.getBehavior = function (key) {
             return this.behaviors[key];
+        };
+        ControllableSprite.prototype.deductHealth = function (amount) {
+            this.health -= amount;
+            if (this.health < 0)
+                this.health = 0;
+            console.log(this.health);
         };
         return ControllableSprite;
     }(Phaser.Sprite));

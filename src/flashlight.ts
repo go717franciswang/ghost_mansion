@@ -62,6 +62,11 @@ module GhostMansion {
                 this.lightCanvas.endFill();
 
                 this.health -= this.game.time.physicsElapsed * 10;
+
+                var g = this.game.ghost;
+                if (VisibilityPolygon.inPolygon([g.x, g.y], visibility)) {
+                    g.deductHealth(this.game.time.physicsElapsed * 30);
+                }
             }
         }
 
