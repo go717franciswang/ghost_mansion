@@ -4,6 +4,7 @@ module GhostMansion {
     export class ControllableSprite extends Phaser.Sprite {
         public behaviors = {};
         public health: number = 100;
+        public tag: string = 'human';
 
         setBehavior(key, behavior) {
             this.behaviors[key] = behavior;

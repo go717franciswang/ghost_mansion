@@ -56,6 +56,7 @@ module GhostMansion {
             this.controllables.add(ghost);
 
             ghost.setBehavior('AI', new AiController(ghost, this));
+            ghost.tag = 'ghost';
             this.ghost = ghost;
         }
 
@@ -71,7 +72,14 @@ module GhostMansion {
             }, this);
 
             this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables);
+            this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
+        }
+
+        collideCallback(a, b) {
+            var human = null;
+            if (a.tag == 'ghost') { human = b; } 
+            else if (b.tag == 'ghost') { human = a; }
+            if (human) human.deductHealth(this.time.physicsElapsed*40);
         }
 
         render() {

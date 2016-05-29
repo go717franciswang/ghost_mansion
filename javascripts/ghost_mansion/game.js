@@ -276,6 +276,7 @@ var GhostMansion;
             _super.apply(this, arguments);
             this.behaviors = {};
             this.health = 100;
+            this.tag = 'human';
         }
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
@@ -287,7 +288,6 @@ var GhostMansion;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;
-            console.log(this.health);
         };
         return ControllableSprite;
     }(Phaser.Sprite));
@@ -342,6 +342,7 @@ var GhostMansion;
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
             ghost.setBehavior('AI', new GhostMansion.AiController(ghost, this));
+            ghost.tag = 'ghost';
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {
@@ -356,7 +357,18 @@ var GhostMansion;
                 }
             }, this);
             this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables);
+            this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
+        };
+        Map1.prototype.collideCallback = function (a, b) {
+            var human = null;
+            if (a.tag == 'ghost') {
+                human = b;
+            }
+            else if (b.tag == 'ghost') {
+                human = a;
+            }
+            if (human)
+                human.deductHealth(this.time.physicsElapsed * 40);
         };
         Map1.prototype.render = function () {
             // this.game.debug.spriteInfo(this.ghost, 32, 32);
