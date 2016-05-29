@@ -53,7 +53,8 @@ module GhostMansion {
                 // this.segments = VisibilityPolygon.breakIntersections(this.segments); // very slow
                 var visibility = VisibilityPolygon.compute(position, this.segments);
                 this.lightCanvas.lineStyle(2, 0xff8800, 0);
-                this.lightCanvas.beginFill(0xffff00, 0.5);
+                var lightIntensity = 0.5*(1-Math.exp(-this.health/10));
+                this.lightCanvas.beginFill(0xffff00, lightIntensity);
                 this.lightCanvas.moveTo(visibility[0][0], visibility[0][1]);
                 for (var i = 1; i < visibility.length; i++) {
                     this.lightCanvas.lineTo(visibility[i][0], visibility[i][1]);
