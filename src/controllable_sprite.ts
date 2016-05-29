@@ -17,6 +17,7 @@ module GhostMansion {
         }
 
         deductHealth(amount) {
+            if (this.panicked) return;
             this.health -= amount;
             if (this.health < 0) this.health = 0;
         }
@@ -24,12 +25,15 @@ module GhostMansion {
         stun(seconds) {
             if (this.stunned || this.panicked) return;
             this.stunned = true;
-            this.setTexture(this.game.state.current.boxStunned); // TODO: get reference to this texture
+            this.loadTexture(this.game.state.states['Map1'].boxStunned);
             this.game.time.events.add(Phaser.Timer.SECOND*seconds, () => {
                 this.stunned = false;
                 this.panicked = true;
-                this.setTexture(this.game.state.current.boxPanicked);
-                this.game.time.events.add(Phaser.Timer.SECOND*3, () => { this.panicked = false; });
+                this.loadTexture(this.game.state.states['Map1'].boxPanicked);
+                this.game.time.events.add(Phaser.Timer.SECOND*3, () => { 
+                    this.panicked = false; 
+                    this.loadTexture(this.game.state.states['Map1'].box);
+                });
             }, this);
         }
 

@@ -299,11 +299,15 @@ var GhostMansion;
             if (this.stunned || this.panicked)
                 return;
             this.stunned = true;
-            console.log(this);
+            this.loadTexture(this.game.state.states['Map1'].boxStunned);
             this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
                 _this.stunned = false;
                 _this.panicked = true;
-                _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () { _this.panicked = false; });
+                _this.loadTexture(_this.game.state.states['Map1'].boxPanicked);
+                _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
+                    _this.panicked = false;
+                    _this.loadTexture(_this.game.state.states['Map1'].box);
+                });
             }, this);
         };
         ControllableSprite.prototype.move = function (vx, vy) {
@@ -335,11 +339,9 @@ var GhostMansion;
         Map1.prototype.create = function () {
             this.physics.startSystem(Phaser.Physics.ARCADE);
             this.stage.backgroundColor = '#787878';
-            var box = this.make.graphics(0, 0);
-            box.lineStyle(8, 0xFF0000, 0.8);
-            box.beginFill(0xFF700B, 1);
-            box.drawRect(-5, -5, 5, 5);
-            box.endFill();
+            this.box = this.makeBox(0xff700b);
+            this.boxStunned = this.makeBox(0x666699);
+            this.boxPanicked = this.makeBox(0xffff00);
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
             this.map.setCollision(404, true, 'walls');
@@ -347,7 +349,7 @@ var GhostMansion;
             this.walls = this.map.createLayer('walls');
             background.resizeWorld();
             this.walls.resizeWorld();
-            var player = new GhostMansion.ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
+            var player = new GhostMansion.ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
             player.anchor.setTo(0.5);
             this.game.add.existing(player);
             this.physics.enable(player);
@@ -362,7 +364,7 @@ var GhostMansion;
                 flashlight: Phaser.KeyCode.ENTER
             }));
             player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
-            var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, box.generateTexture());
+            var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
@@ -386,6 +388,14 @@ var GhostMansion;
             this.physics.arcade.collide(this.controllables, this.walls);
             this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
         };
+        Map1.prototype.makeBox = function (color) {
+            var box = this.make.graphics(0, 0);
+            box.lineStyle(8, color, 0.8);
+            box.beginFill(color, 1);
+            box.drawRect(-5, -5, 5, 5);
+            box.endFill();
+            return box.generateTexture();
+        };
         Map1.prototype.collideCallback = function (a, b) {
             var human = null;
             var ghost = null;
@@ -399,7 +409,7 @@ var GhostMansion;
             }
             if (human) {
                 human.deductHealth(this.time.physicsElapsed * 40);
-                human.stun();
+                human.stun(3);
             }
         };
         Map1.prototype.render = function () {

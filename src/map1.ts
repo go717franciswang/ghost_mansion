@@ -78,7 +78,7 @@ module GhostMansion {
 
         makeBox(color) {
             var box = this.make.graphics(0,0);
-            box.lineStyle(8, 0xFF0000, 0.8);
+            box.lineStyle(8, color, 0.8);
             box.beginFill(color, 1);
             box.drawRect(-5, -5, 5, 5);
             box.endFill();
@@ -98,7 +98,7 @@ module GhostMansion {
 
             if (human) {
                 human.deductHealth(this.time.physicsElapsed*40);
-                human.stun();
+                human.stun(3);
             }
         }
 
