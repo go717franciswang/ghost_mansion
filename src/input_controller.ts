@@ -42,8 +42,8 @@ module GhostMansion {
                     if (v.y > 0) this.direction = Math.PI/2;
                     else this.direction = -Math.PI/2;
                 } else {
-                    if (v.y == 0 && v.x < 0) this.direction = Math.PI;
-                    else this.direction = Math.atan(v.y/v.x);
+                    this.direction = Math.atan(v.y/v.x);
+                    if (v.x < 0) this.direction += Math.PI;
                 }
             }
         }

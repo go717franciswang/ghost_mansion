@@ -61,10 +61,9 @@ var GhostMansion;
                         this.direction = -Math.PI / 2;
                 }
                 else {
-                    if (v.y == 0 && v.x < 0)
-                        this.direction = Math.PI;
-                    else
-                        this.direction = Math.atan(v.y / v.x);
+                    this.direction = Math.atan(v.y / v.x);
+                    if (v.x < 0)
+                        this.direction += Math.PI;
                 }
             }
         };
@@ -220,17 +219,25 @@ var GhostMansion;
                     ]);
                 }
             }, this, 0, 0, m.width, m.height, this.game.walls);
-            console.log(this.polygons);
-            this.segments = VisibilityPolygon.convertToSegments(this.polygons);
             this.lightCanvas = this.game.add.graphics(0, 0);
             this.inputController = this.sprite.getBehavior('inputController');
         }
         FlashLight.prototype.update = function () {
-            console.log(this.inputController.direction);
             var position = [this.sprite.x, this.sprite.y];
+            var a = this.inputController.direction;
+            var rayWidth = 0.7;
+            var rayLength = 70;
+            this.polygons[0] = [
+                // make sure ray begins behind origin
+                [this.sprite.x - Math.cos(a) * 5, this.sprite.y - Math.sin(a) * 5],
+                [this.sprite.x + Math.cos(a + rayWidth) * rayLength, this.sprite.y + Math.sin(a + rayWidth) * rayLength],
+                [this.sprite.x + Math.cos(a - rayWidth) * rayLength, this.sprite.y + Math.sin(a - rayWidth) * rayLength]
+            ];
+            this.segments = VisibilityPolygon.convertToSegments(this.polygons);
+            // this.segments = VisibilityPolygon.breakIntersections(this.segments); // very slow
             var visibility = VisibilityPolygon.compute(position, this.segments);
             this.lightCanvas.clear();
-            this.lightCanvas.lineStyle(2, 0xff8800, 0.5);
+            this.lightCanvas.lineStyle(2, 0xff8800, 0);
             this.lightCanvas.beginFill(0xffff00, 0.5);
             this.lightCanvas.moveTo(visibility[0][0], visibility[0][1]);
             for (var i = 1; i < visibility.length; i++) {
