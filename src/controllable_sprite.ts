@@ -6,6 +6,7 @@ module GhostMansion {
         public health: number = 100;
         public tag: string = 'human';
         private stunned: boolean = false;
+        private panicked: boolean = false;
 
         setBehavior(key, behavior) {
             this.behaviors[key] = behavior;
@@ -21,11 +22,14 @@ module GhostMansion {
         }
 
         stun(seconds) {
-            if (this.stunned) return;
-            console.log('stunned');
+            if (this.stunned || this.panicked) return;
             this.stunned = true;
+            this.setTexture(this.game.state.current.boxStunned); // TODO: get reference to this texture
             this.game.time.events.add(Phaser.Timer.SECOND*seconds, () => {
                 this.stunned = false;
+                this.panicked = true;
+                this.setTexture(this.game.state.current.boxPanicked);
+                this.game.time.events.add(Phaser.Timer.SECOND*3, () => { this.panicked = false; });
             }, this);
         }
 

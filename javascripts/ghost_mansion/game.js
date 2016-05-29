@@ -281,6 +281,7 @@ var GhostMansion;
             this.health = 100;
             this.tag = 'human';
             this.stunned = false;
+            this.panicked = false;
         }
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
@@ -295,12 +296,14 @@ var GhostMansion;
         };
         ControllableSprite.prototype.stun = function (seconds) {
             var _this = this;
-            if (this.stunned)
+            if (this.stunned || this.panicked)
                 return;
-            console.log('stunned');
             this.stunned = true;
+            console.log(this);
             this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
                 _this.stunned = false;
+                _this.panicked = true;
+                _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () { _this.panicked = false; });
             }, this);
         };
         ControllableSprite.prototype.move = function (vx, vy) {
@@ -385,14 +388,19 @@ var GhostMansion;
         };
         Map1.prototype.collideCallback = function (a, b) {
             var human = null;
+            var ghost = null;
             if (a.tag == 'ghost') {
                 human = b;
+                ghost = a;
             }
             else if (b.tag == 'ghost') {
                 human = a;
+                ghost = b;
             }
-            if (human)
+            if (human) {
                 human.deductHealth(this.time.physicsElapsed * 40);
+                human.stun();
+            }
         };
         Map1.prototype.render = function () {
             // this.game.debug.spriteInfo(this.ghost, 32, 32);

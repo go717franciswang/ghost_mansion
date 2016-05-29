@@ -10,16 +10,17 @@ module GhostMansion {
         map: Phaser.Tilemap;
         walls: Phaser.TilemapLayer;
         ghost: any;
+        box: any;
+        boxStunned: any;
+        boxPanicked: any;
 
         create() {
             this.physics.startSystem(Phaser.Physics.ARCADE);
             this.stage.backgroundColor = '#787878';
 
-            var box = this.make.graphics(0,0);
-            box.lineStyle(8, 0xFF0000, 0.8);
-            box.beginFill(0xFF700B, 1);
-            box.drawRect(-5, -5, 5, 5);
-            box.endFill();
+            this.box = this.makeBox(0xff700b);
+            this.boxStunned = this.makeBox(0x666699);
+            this.boxPanicked = this.makeBox(0xffff00);
 
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
@@ -30,7 +31,7 @@ module GhostMansion {
             background.resizeWorld();
             this.walls.resizeWorld();
 
-            var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, box.generateTexture());
+            var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
             player.anchor.setTo(0.5);
             this.game.add.existing(player);
             this.physics.enable(player);
@@ -48,7 +49,7 @@ module GhostMansion {
 
             player.setBehavior('flashlight', new FlashLight(player, this));
 
-            var ghost = new ControllableSprite(this.game, 0, 0, box.generateTexture());
+            var ghost = new ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
@@ -75,11 +76,30 @@ module GhostMansion {
             this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
         }
 
+        makeBox(color) {
+            var box = this.make.graphics(0,0);
+            box.lineStyle(8, 0xFF0000, 0.8);
+            box.beginFill(color, 1);
+            box.drawRect(-5, -5, 5, 5);
+            box.endFill();
+            return box.generateTexture();
+        }
+
         collideCallback(a, b) {
             var human = null;
-            if (a.tag == 'ghost') { human = b; } 
-            else if (b.tag == 'ghost') { human = a; }
-            if (human) human.deductHealth(this.time.physicsElapsed*40);
+            var ghost = null;
+            if (a.tag == 'ghost') { 
+                human = b; 
+                ghost = a;
+            } else if (b.tag == 'ghost') { 
+                human = a; 
+                ghost = b;
+            }
+
+            if (human) {
+                human.deductHealth(this.time.physicsElapsed*40);
+                human.stun();
+            }
         }
 
         render() {
