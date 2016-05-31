@@ -275,14 +275,24 @@ var GhostMansion;
 (function (GhostMansion) {
     var ControllableSprite = (function (_super) {
         __extends(ControllableSprite, _super);
-        function ControllableSprite() {
-            _super.apply(this, arguments);
+        function ControllableSprite(g, x, y, k) {
+            _super.call(this, g, x, y, k);
             this.behaviors = {};
             this.health = 100;
             this.tag = 'human';
             this.stunned = false;
             this.panicked = false;
+            this.addHealthBar();
         }
+        ControllableSprite.prototype.addHealthBar = function () {
+            var rect = this.game.make.graphics(0, 0);
+            rect.beginFill(0xff0000);
+            rect.drawRect(-10, -2, 20, 4);
+            rect.endFill();
+            this.healthBar = this.game.make.sprite(0, -this.height * 1.1, rect.generateTexture());
+            this.healthBar.anchor.setTo(0.5);
+            this.addChild(this.healthBar);
+        };
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
         };
@@ -290,6 +300,8 @@ var GhostMansion;
             return this.behaviors[key];
         };
         ControllableSprite.prototype.deductHealth = function (amount) {
+            if (this.panicked)
+                return;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;

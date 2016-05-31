@@ -4,9 +4,25 @@ module GhostMansion {
     export class ControllableSprite extends Phaser.Sprite {
         public behaviors = {};
         public health: number = 100;
+        public healthBar;
         public tag: string = 'human';
         private stunned: boolean = false;
         private panicked: boolean = false;
+
+        constructor(g, x, y, k) {
+            super(g, x, y, k);
+            this.addHealthBar();
+        }
+
+        addHealthBar() {
+            var rect = this.game.make.graphics(0, 0);
+            rect.beginFill(0xff0000);
+            rect.drawRect(-10, -2, 20, 4);
+            rect.endFill();
+            this.healthBar = this.game.make.sprite(0, -this.height*1.1, rect.generateTexture());
+            this.healthBar.anchor.setTo(0.5);
+            this.addChild(this.healthBar);
+        }
 
         setBehavior(key, behavior) {
             this.behaviors[key] = behavior;
