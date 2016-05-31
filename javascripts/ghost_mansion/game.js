@@ -273,26 +273,50 @@ var GhostMansion;
 /// <reference path="./phaser.d.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
+    var ValueBar = (function (_super) {
+        __extends(ValueBar, _super);
+        function ValueBar(game, color, x, y, valueFunc, valueFuncContext) {
+            _super.call(this, game, x, y, null);
+            this.valueFunc = valueFunc;
+            this.valueFuncContext = valueFuncContext;
+            this.maxWidth = 20;
+            var rect = game.make.graphics(0, 0);
+            rect.beginFill(color);
+            rect.drawRect(-10, -2, this.maxWidth, 4);
+            rect.endFill();
+            var texture = rect.generateTexture();
+            this.loadTexture(texture);
+            this.anchor.setTo(0.5);
+        }
+        ValueBar.prototype.postUpdate = function () {
+            this.width = this.maxWidth * this.getValue() / 100;
+        };
+        ValueBar.prototype.getValue = function () {
+            return this.valueFunc.call(this.valueFuncContext);
+        };
+        return ValueBar;
+    }(Phaser.Sprite));
+    GhostMansion.ValueBar = ValueBar;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./value_bar.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
     var ControllableSprite = (function (_super) {
         __extends(ControllableSprite, _super);
         function ControllableSprite(g, x, y, k) {
+            var _this = this;
             _super.call(this, g, x, y, k);
             this.behaviors = {};
             this.health = 100;
             this.tag = 'human';
             this.stunned = false;
             this.panicked = false;
-            this.addHealthBar();
-        }
-        ControllableSprite.prototype.addHealthBar = function () {
-            var rect = this.game.make.graphics(0, 0);
-            rect.beginFill(0xff0000);
-            rect.drawRect(-10, -2, 20, 4);
-            rect.endFill();
-            this.healthBar = this.game.make.sprite(0, -this.height * 1.1, rect.generateTexture());
-            this.healthBar.anchor.setTo(0.5);
+            this.healthBar = new GhostMansion.ValueBar(g, 0xff0000, 0, -this.height * 1.1, function () {
+                return _this.health;
+            }, this);
             this.addChild(this.healthBar);
-        };
+        }
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
             this.behaviors[key] = behavior;
         };
@@ -305,7 +329,6 @@ var GhostMansion;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;
-            this.healthBar.width = this.healthBar.width * this.health / 100;
         };
         ControllableSprite.prototype.stun = function (seconds) {
             var _this = this;

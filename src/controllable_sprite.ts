@@ -1,4 +1,5 @@
 /// <reference path="./phaser.d.ts"/>
+/// <reference path="./value_bar.ts"/>
 
 module GhostMansion {
     export class ControllableSprite extends Phaser.Sprite {
@@ -11,16 +12,9 @@ module GhostMansion {
 
         constructor(g, x, y, k) {
             super(g, x, y, k);
-            this.addHealthBar();
-        }
-
-        addHealthBar() {
-            var rect = this.game.make.graphics(0, 0);
-            rect.beginFill(0xff0000);
-            rect.drawRect(-10, -2, 20, 4);
-            rect.endFill();
-            this.healthBar = this.game.make.sprite(0, -this.height*1.1, rect.generateTexture());
-            this.healthBar.anchor.setTo(0.5);
+            this.healthBar = new ValueBar(g, 0xff0000, 0, -this.height*1.1, () => { 
+                return this.health 
+            }, this);
             this.addChild(this.healthBar);
         }
 
@@ -36,7 +30,6 @@ module GhostMansion {
             if (this.panicked) return;
             this.health -= amount;
             if (this.health < 0) this.health = 0;
-            this.healthBar.width = this.healthBar.width * this.health / 100;
         }
 
         stun(seconds) {

@@ -7,6 +7,7 @@
         "preloader.ts",
         "input_controller",
         "ai_controller",
+        "value_bar",
         "flashlight",
         "controllable_sprite",
         "map1.ts"
