@@ -291,8 +291,6 @@ var GhostMansion;
             rect.endFill();
             this.healthBar = this.game.make.sprite(0, -this.height * 1.1, rect.generateTexture());
             this.healthBar.anchor.setTo(0.5);
-            this.healthBarRect = new Phaser.Rectangle(0, 0, this.healthBar.width, this.healthBar.height);
-            this.healthBar.crop(this.healthBarRect);
             this.addChild(this.healthBar);
         };
         ControllableSprite.prototype.setBehavior = function (key, behavior) {
@@ -307,8 +305,7 @@ var GhostMansion;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;
-            this.healthBarRect.width = this.healthBar.width * this.health / 100;
-            this.healthBar.updateCrop();
+            this.healthBar.width = this.healthBar.width * this.health / 100;
         };
         ControllableSprite.prototype.stun = function (seconds) {
             var _this = this;
