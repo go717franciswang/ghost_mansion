@@ -1,5 +1,6 @@
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./visibility_polygon.d.ts"/>
+/// <reference path="./value_bar.ts"/>
 
 module GhostMansion {
     export class FlashLight {
@@ -33,6 +34,11 @@ module GhostMansion {
 
             this.lightCanvas = this.game.add.graphics(0, 0);
             this.inputController = this.sprite.getBehavior('inputController');
+
+            var lightBar = new ValueBar(this.game, 0xffff00, 0, -this.sprite.height*0.8, () => {
+                return this.health;
+            }, this);
+            this.sprite.addChild(lightBar);
         }
 
         update() {

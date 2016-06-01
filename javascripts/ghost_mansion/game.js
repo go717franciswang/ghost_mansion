@@ -196,7 +196,36 @@ var GhostMansion;
     GhostMansion.AiController = AiController;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var ValueBar = (function (_super) {
+        __extends(ValueBar, _super);
+        function ValueBar(game, color, x, y, valueFunc, valueFuncContext) {
+            _super.call(this, game, x, y, null);
+            this.valueFunc = valueFunc;
+            this.valueFuncContext = valueFuncContext;
+            this.maxWidth = 20;
+            var rect = game.make.graphics(0, 0);
+            rect.beginFill(color);
+            rect.drawRect(-10, -2, this.maxWidth, 4);
+            rect.endFill();
+            var texture = rect.generateTexture();
+            this.loadTexture(texture);
+            this.anchor.setTo(0.5);
+        }
+        ValueBar.prototype.postUpdate = function () {
+            this.width = this.maxWidth * this.getValue() / 100;
+        };
+        ValueBar.prototype.getValue = function () {
+            return this.valueFunc.call(this.valueFuncContext);
+        };
+        return ValueBar;
+    }(Phaser.Sprite));
+    GhostMansion.ValueBar = ValueBar;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
 /// <reference path="./visibility_polygon.d.ts"/>
+/// <reference path="./value_bar.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     var FlashLight = (function () {
@@ -227,6 +256,10 @@ var GhostMansion;
             }, this, 0, 0, m.width, m.height, this.game.walls);
             this.lightCanvas = this.game.add.graphics(0, 0);
             this.inputController = this.sprite.getBehavior('inputController');
+            var lightBar = new GhostMansion.ValueBar(this.game, 0xffff00, 0, -this.sprite.height * 0.8, function () {
+                return _this.health;
+            }, this);
+            this.sprite.addChild(lightBar);
         }
         FlashLight.prototype.update = function () {
             var position = [this.sprite.x, this.sprite.y];
@@ -269,34 +302,6 @@ var GhostMansion;
         return FlashLight;
     }());
     GhostMansion.FlashLight = FlashLight;
-})(GhostMansion || (GhostMansion = {}));
-/// <reference path="./phaser.d.ts"/>
-var GhostMansion;
-(function (GhostMansion) {
-    var ValueBar = (function (_super) {
-        __extends(ValueBar, _super);
-        function ValueBar(game, color, x, y, valueFunc, valueFuncContext) {
-            _super.call(this, game, x, y, null);
-            this.valueFunc = valueFunc;
-            this.valueFuncContext = valueFuncContext;
-            this.maxWidth = 20;
-            var rect = game.make.graphics(0, 0);
-            rect.beginFill(color);
-            rect.drawRect(-10, -2, this.maxWidth, 4);
-            rect.endFill();
-            var texture = rect.generateTexture();
-            this.loadTexture(texture);
-            this.anchor.setTo(0.5);
-        }
-        ValueBar.prototype.postUpdate = function () {
-            this.width = this.maxWidth * this.getValue() / 100;
-        };
-        ValueBar.prototype.getValue = function () {
-            return this.valueFunc.call(this.valueFuncContext);
-        };
-        return ValueBar;
-    }(Phaser.Sprite));
-    GhostMansion.ValueBar = ValueBar;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./value_bar.ts"/>
