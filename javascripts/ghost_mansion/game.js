@@ -304,6 +304,36 @@ var GhostMansion;
     GhostMansion.FlashLight = FlashLight;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var VicinityRing = (function () {
+        function VicinityRing(sprite, game) {
+            this.sprite = sprite;
+            this.game = game;
+            var graphics = game.make.graphics(0, 0);
+            graphics.lineStyle(2, 0x0000ff, 1);
+            graphics.drawCircle(0, 0, 100);
+            this.circle = new Phaser.Sprite(game, 0, 0, graphics.generateTexture());
+            this.circle.anchor.setTo(0.5);
+            this.sprite.addChild(this.circle);
+            this.circle.alpha = 0;
+        }
+        VicinityRing.prototype.update = function () {
+            var d = this.distanceToGhost();
+            this.circle.alpha = (d < 100);
+            this.circle.width = d;
+            this.circle.height = d;
+        };
+        VicinityRing.prototype.distanceToGhost = function () {
+            var d = Phaser.Point.distance(this.game.ghost.position, this.sprite.position);
+            d = Math.max(30, d);
+            return d;
+        };
+        return VicinityRing;
+    }());
+    GhostMansion.VicinityRing = VicinityRing;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
 /// <reference path="./value_bar.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
@@ -369,6 +399,7 @@ var GhostMansion;
 /// <reference path="./input_controller.ts"/>
 /// <reference path="./ai_controller.ts"/>
 /// <reference path="./flashlight.ts"/>
+/// <reference path="./vicinity_ring.ts"/>
 /// <reference path="./controllable_sprite.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
@@ -405,8 +436,10 @@ var GhostMansion;
                 flashlight: Phaser.KeyCode.ENTER
             }));
             player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
+            player.setBehavior('vicinityRing', new GhostMansion.VicinityRing(player, this));
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
+            ghost.alpha = 0;
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;

@@ -2,6 +2,7 @@
 /// <reference path="./input_controller.ts"/>
 /// <reference path="./ai_controller.ts"/>
 /// <reference path="./flashlight.ts"/>
+/// <reference path="./vicinity_ring.ts"/>
 /// <reference path="./controllable_sprite.ts"/>
 
 module GhostMansion {
@@ -48,9 +49,11 @@ module GhostMansion {
             }));
 
             player.setBehavior('flashlight', new FlashLight(player, this));
+            player.setBehavior('vicinityRing', new VicinityRing(player, this));
 
             var ghost = new ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
+            ghost.alpha = 0;
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;

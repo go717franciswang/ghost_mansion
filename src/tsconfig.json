@@ -9,6 +9,7 @@
         "ai_controller",
         "value_bar",
         "flashlight",
+        "vicinity_ring",
         "controllable_sprite",
         "map1.ts"
     ]
