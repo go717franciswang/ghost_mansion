@@ -34,7 +34,8 @@ module GhostMansion {
                 vy = this.velocity;
             }
 
-            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
+            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)
+               && this.sprite.entityState == EntityState.Normal) {
                 this.sprite.getBehavior('flashlight').turnOn();
             } else {
                 this.sprite.getBehavior('flashlight').turnOff();

@@ -50,7 +50,8 @@ var GhostMansion;
             else if (this.game.input.keyboard.isDown(this.keyMap.down)) {
                 vy = this.velocity;
             }
-            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)) {
+            if (this.game.input.keyboard.isDown(this.keyMap.flashlight)
+                && this.sprite.entityState == GhostMansion.EntityState.Normal) {
                 this.sprite.getBehavior('flashlight').turnOn();
             }
             else {
