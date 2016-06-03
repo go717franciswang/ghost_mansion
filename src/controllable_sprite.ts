@@ -2,13 +2,21 @@
 /// <reference path="./value_bar.ts"/>
 
 module GhostMansion {
+    enum EntityState {
+        Normal,
+        Stunned,
+        Panicked
+    }
+
     export class ControllableSprite extends Phaser.Sprite {
         public behaviors = {};
         public health: number = 100;
         public healthBar;
         public tag: string = 'human';
-        private stunned: boolean = false;
-        private panicked: boolean = false;
+        private entityState = EntityState.Normal;
+        public onStun;
+        public onPanic;
+        public onNormal;
 
         constructor(g, x, y, k) {
             super(g, x, y, k);
@@ -27,31 +35,35 @@ module GhostMansion {
         }
 
         deductHealth(amount) {
-            if (this.panicked) return;
+            if (this.entityState == EntityState.Panicked) return;
             this.health -= amount;
             if (this.health < 0) this.health = 0;
         }
 
         stun(seconds) {
-            if (this.stunned || this.panicked) return;
-            this.stunned = true;
+            if (this.entityState != EntityState.Normal) return;
+            this.entityState = EntityState.Stunned;
+            if (this.onStun) this.onStun();
             this.loadTexture(this.game.state.states['Map1'].boxStunned);
             this.game.time.events.add(Phaser.Timer.SECOND*seconds, () => {
-                this.stunned = false;
-                this.panicked = true;
+                this.entityState = EntityState.Panicked;
+                if (this.onPanic) this.onPanic();
                 this.loadTexture(this.game.state.states['Map1'].boxPanicked);
                 this.game.time.events.add(Phaser.Timer.SECOND*3, () => { 
-                    this.panicked = false; 
+                    this.entityState = EntityState.Normal;
+                    if (this.onNormal) this.onNormal();
                     this.loadTexture(this.game.state.states['Map1'].box);
                 });
             }, this);
         }
 
         move(vx, vy) {
-            if (this.stunned) {
+            if (this.entityState == EntityState.Stunned) {
+                this.body.static = true;
                 this.body.velocity.x = 0;
                 this.body.velocity.y = 0;
             } else {
+                this.body.static = false;
                 this.body.velocity.x = vx;
                 this.body.velocity.y = vy;
             }

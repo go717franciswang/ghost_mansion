@@ -16,13 +16,13 @@ module GhostMansion {
 
         update() {
             var d = this.distanceToGhost();
-            this.circle.alpha = (d < 100);
+            this.circle.alpha = (d < 150);
             this.circle.width = d;
             this.circle.height = d;
         }
 
         distanceToGhost() {
-            var d = Phaser.Point.distance(this.game.ghost.position, this.sprite.position);
+            var d = Phaser.Point.distance(this.game.ghost.position, this.sprite.position)*2;
             d = Math.max(30, d);
             return d;
         }

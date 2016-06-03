@@ -320,12 +320,12 @@ var GhostMansion;
         }
         VicinityRing.prototype.update = function () {
             var d = this.distanceToGhost();
-            this.circle.alpha = (d < 100);
+            this.circle.alpha = (d < 150);
             this.circle.width = d;
             this.circle.height = d;
         };
         VicinityRing.prototype.distanceToGhost = function () {
-            var d = Phaser.Point.distance(this.game.ghost.position, this.sprite.position);
+            var d = Phaser.Point.distance(this.game.ghost.position, this.sprite.position) * 2;
             d = Math.max(30, d);
             return d;
         };
@@ -337,6 +337,12 @@ var GhostMansion;
 /// <reference path="./value_bar.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
+    var EntityState;
+    (function (EntityState) {
+        EntityState[EntityState["Normal"] = 0] = "Normal";
+        EntityState[EntityState["Stunned"] = 1] = "Stunned";
+        EntityState[EntityState["Panicked"] = 2] = "Panicked";
+    })(EntityState || (EntityState = {}));
     var ControllableSprite = (function (_super) {
         __extends(ControllableSprite, _super);
         function ControllableSprite(g, x, y, k) {
@@ -345,8 +351,7 @@ var GhostMansion;
             this.behaviors = {};
             this.health = 100;
             this.tag = 'human';
-            this.stunned = false;
-            this.panicked = false;
+            this.entityState = EntityState.Normal;
             this.healthBar = new GhostMansion.ValueBar(g, 0xff0000, 0, -this.height * 1.1, function () {
                 return _this.health;
             }, this);
@@ -359,7 +364,7 @@ var GhostMansion;
             return this.behaviors[key];
         };
         ControllableSprite.prototype.deductHealth = function (amount) {
-            if (this.panicked)
+            if (this.entityState == EntityState.Panicked)
                 return;
             this.health -= amount;
             if (this.health < 0)
@@ -367,26 +372,33 @@ var GhostMansion;
         };
         ControllableSprite.prototype.stun = function (seconds) {
             var _this = this;
-            if (this.stunned || this.panicked)
+            if (this.entityState != EntityState.Normal)
                 return;
-            this.stunned = true;
+            this.entityState = EntityState.Stunned;
+            if (this.onStun)
+                this.onStun();
             this.loadTexture(this.game.state.states['Map1'].boxStunned);
             this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
-                _this.stunned = false;
-                _this.panicked = true;
+                _this.entityState = EntityState.Panicked;
+                if (_this.onPanic)
+                    _this.onPanic();
                 _this.loadTexture(_this.game.state.states['Map1'].boxPanicked);
                 _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
-                    _this.panicked = false;
+                    _this.entityState = EntityState.Normal;
+                    if (_this.onNormal)
+                        _this.onNormal();
                     _this.loadTexture(_this.game.state.states['Map1'].box);
                 });
             }, this);
         };
         ControllableSprite.prototype.move = function (vx, vy) {
-            if (this.stunned) {
+            if (this.entityState == EntityState.Stunned) {
+                this.body.static = true;
                 this.body.velocity.x = 0;
                 this.body.velocity.y = 0;
             }
             else {
+                this.body.static = false;
                 this.body.velocity.x = vx;
                 this.body.velocity.y = vy;
             }
@@ -446,6 +458,8 @@ var GhostMansion;
             this.controllables.add(ghost);
             ghost.setBehavior('AI', new GhostMansion.AiController(ghost, this));
             ghost.tag = 'ghost';
+            ghost.onStun = function () { ghost.alpha = 1; };
+            ghost.onNormal = function () { ghost.alpha = 0; };
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {

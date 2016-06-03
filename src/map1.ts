@@ -61,6 +61,8 @@ module GhostMansion {
 
             ghost.setBehavior('AI', new AiController(ghost, this));
             ghost.tag = 'ghost';
+            ghost.onStun = () => { ghost.alpha = 1; };
+            ghost.onNormal = () => { ghost.alpha = 0; };
             this.ghost = ghost;
         }
 
