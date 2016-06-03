@@ -78,7 +78,8 @@ module GhostMansion {
             }, this);
 
             this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
+            this.physics.arcade.collide(this.controllables, this.controllables, 
+                                        this.collideCallback, this.processCallback, this);
         }
 
         makeBox(color) {
@@ -105,6 +106,16 @@ module GhostMansion {
                 human.deductHealth(this.time.physicsElapsed*40);
                 human.stun(3);
             }
+        }
+
+        processCallback(a, b) {
+            if ((a.tag == 'ghost' || a.tag == 'human') && a.entityState == EntityState.Panicked) {
+                return false;
+            }
+            if ((b.tag == 'ghost' || b.tag == 'human') && b.entityState == EntityState.Panicked) {
+                return false;
+            }
+            return true;
         }
 
         render() {

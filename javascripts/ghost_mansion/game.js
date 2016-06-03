@@ -337,12 +337,12 @@ var GhostMansion;
 /// <reference path="./value_bar.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
-    var EntityState;
     (function (EntityState) {
         EntityState[EntityState["Normal"] = 0] = "Normal";
         EntityState[EntityState["Stunned"] = 1] = "Stunned";
         EntityState[EntityState["Panicked"] = 2] = "Panicked";
-    })(EntityState || (EntityState = {}));
+    })(GhostMansion.EntityState || (GhostMansion.EntityState = {}));
+    var EntityState = GhostMansion.EntityState;
     var ControllableSprite = (function (_super) {
         __extends(ControllableSprite, _super);
         function ControllableSprite(g, x, y, k) {
@@ -474,7 +474,7 @@ var GhostMansion;
                 }
             }, this);
             this.physics.arcade.collide(this.controllables, this.walls);
-            this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, null, this);
+            this.physics.arcade.collide(this.controllables, this.controllables, this.collideCallback, this.processCallback, this);
         };
         Map1.prototype.makeBox = function (color) {
             var box = this.make.graphics(0, 0);
@@ -499,6 +499,15 @@ var GhostMansion;
                 human.deductHealth(this.time.physicsElapsed * 40);
                 human.stun(3);
             }
+        };
+        Map1.prototype.processCallback = function (a, b) {
+            if ((a.tag == 'ghost' || a.tag == 'human') && a.entityState == GhostMansion.EntityState.Panicked) {
+                return false;
+            }
+            if ((b.tag == 'ghost' || b.tag == 'human') && b.entityState == GhostMansion.EntityState.Panicked) {
+                return false;
+            }
+            return true;
         };
         Map1.prototype.render = function () {
             // this.game.debug.spriteInfo(this.ghost, 32, 32);

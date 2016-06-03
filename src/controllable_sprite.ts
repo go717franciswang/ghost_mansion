@@ -2,7 +2,7 @@
 /// <reference path="./value_bar.ts"/>
 
 module GhostMansion {
-    enum EntityState {
+    export enum EntityState {
         Normal,
         Stunned,
         Panicked
@@ -13,7 +13,7 @@ module GhostMansion {
         public health: number = 100;
         public healthBar;
         public tag: string = 'human';
-        private entityState = EntityState.Normal;
+        public entityState = EntityState.Normal;
         public onStun;
         public onPanic;
         public onNormal;
