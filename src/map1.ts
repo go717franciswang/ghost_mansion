@@ -14,6 +14,7 @@ module GhostMansion {
         box: any;
         boxStunned: any;
         boxPanicked: any;
+        private lives = 3;
 
         create() {
             this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -50,6 +51,19 @@ module GhostMansion {
 
             player.setBehavior('flashlight', new FlashLight(player, this));
             player.setBehavior('vicinityRing', new VicinityRing(player, this));
+            player.onDeath = () => {
+                this.lives--;
+                if (this.lives <= 0) {
+                    this.displayMessage('You lose');
+                    this.gameOver();
+                } else {
+                    var text = this.displayMessage('You have ' + this.lives + ' lives left');
+                    var tween = this.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
+                    tween.onComplete.add(() => { text.destroy(); });
+                    player.health = 100;
+                    player.getBehavior('flashlight').health = 100;
+                }
+            }
 
             var ghost = new ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
@@ -64,15 +78,24 @@ module GhostMansion {
             ghost.onStun = () => { ghost.alpha = 1; };
             ghost.onNormal = () => { ghost.alpha = 0; };
             ghost.onDeath = () => {
-                var style = { font: '32px Arial' };
-                var text = this.add.text(this.world.centerX, this.world.centerY, 'You WIN', style);
-                text.anchor.set(0.5);
-                text.align = 'center';
-                this.controllables.forEachAlive((c) => {
-                    c.purgeBehaviors();
-                }, this);
+                this.displayMessage('You win');
+                this.gameOver();
             };
             this.ghost = ghost;
+        }
+
+        gameOver() {
+            this.controllables.forEachAlive((c) => {
+                c.purgeBehaviors();
+            }, this);
+        }
+
+        displayMessage(msg) {
+            var style = { font: '32px Arial' };
+            var text = this.add.text(this.world.centerX, this.world.centerY, msg, style);
+            text.anchor.set(0.5);
+            text.align = 'center';
+            return text;
         }
 
         update() {
@@ -112,7 +135,7 @@ module GhostMansion {
             }
 
             if (human) {
-                human.deductHealth(this.time.physicsElapsed*40);
+                human.deductHealth(this.time.physicsElapsed*100);
                 human.stun(3);
             }
         }

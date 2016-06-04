@@ -425,6 +425,7 @@ var GhostMansion;
         __extends(Map1, _super);
         function Map1() {
             _super.apply(this, arguments);
+            this.lives = 3;
         }
         Map1.prototype.create = function () {
             var _this = this;
@@ -456,6 +457,20 @@ var GhostMansion;
             }));
             player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
             player.setBehavior('vicinityRing', new GhostMansion.VicinityRing(player, this));
+            player.onDeath = function () {
+                _this.lives--;
+                if (_this.lives <= 0) {
+                    _this.displayMessage('You lose');
+                    _this.gameOver();
+                }
+                else {
+                    var text = _this.displayMessage('You have ' + _this.lives + ' lives left');
+                    var tween = _this.add.tween(text).to({ alpha: 0 }, 2000, Phaser.Easing.Linear.None, true);
+                    tween.onComplete.add(function () { text.destroy(); });
+                    player.health = 100;
+                    player.getBehavior('flashlight').health = 100;
+                }
+            };
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
             ghost.alpha = 0;
@@ -468,15 +483,22 @@ var GhostMansion;
             ghost.onStun = function () { ghost.alpha = 1; };
             ghost.onNormal = function () { ghost.alpha = 0; };
             ghost.onDeath = function () {
-                var style = { font: '32px Arial' };
-                var text = _this.add.text(_this.world.centerX, _this.world.centerY, 'You WIN', style);
-                text.anchor.set(0.5);
-                text.align = 'center';
-                _this.controllables.forEachAlive(function (c) {
-                    c.purgeBehaviors();
-                }, _this);
+                _this.displayMessage('You win');
+                _this.gameOver();
             };
             this.ghost = ghost;
+        };
+        Map1.prototype.gameOver = function () {
+            this.controllables.forEachAlive(function (c) {
+                c.purgeBehaviors();
+            }, this);
+        };
+        Map1.prototype.displayMessage = function (msg) {
+            var style = { font: '32px Arial' };
+            var text = this.add.text(this.world.centerX, this.world.centerY, msg, style);
+            text.anchor.set(0.5);
+            text.align = 'center';
+            return text;
         };
         Map1.prototype.update = function () {
             this.controllables.forEachAlive(function (controllable) {
@@ -512,7 +534,7 @@ var GhostMansion;
                 ghost = b;
             }
             if (human) {
-                human.deductHealth(this.time.physicsElapsed * 40);
+                human.deductHealth(this.time.physicsElapsed * 100);
                 human.stun(3);
             }
         };
