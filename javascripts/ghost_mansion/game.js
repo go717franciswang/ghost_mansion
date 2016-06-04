@@ -364,12 +364,17 @@ var GhostMansion;
         ControllableSprite.prototype.getBehavior = function (key) {
             return this.behaviors[key];
         };
+        ControllableSprite.prototype.purgeBehaviors = function () {
+            this.behaviors = {};
+        };
         ControllableSprite.prototype.deductHealth = function (amount) {
             if (this.entityState == EntityState.Panicked)
                 return;
             this.health -= amount;
             if (this.health < 0)
                 this.health = 0;
+            if (this.health == 0 && this.onDeath)
+                this.onDeath();
         };
         ControllableSprite.prototype.stun = function (seconds) {
             var _this = this;
@@ -422,6 +427,7 @@ var GhostMansion;
             _super.apply(this, arguments);
         }
         Map1.prototype.create = function () {
+            var _this = this;
             this.physics.startSystem(Phaser.Physics.ARCADE);
             this.stage.backgroundColor = '#787878';
             this.box = this.makeBox(0xff700b);
@@ -461,6 +467,15 @@ var GhostMansion;
             ghost.tag = 'ghost';
             ghost.onStun = function () { ghost.alpha = 1; };
             ghost.onNormal = function () { ghost.alpha = 0; };
+            ghost.onDeath = function () {
+                var style = { font: '32px Arial' };
+                var text = _this.add.text(_this.world.centerX, _this.world.centerY, 'You WIN', style);
+                text.anchor.set(0.5);
+                text.align = 'center';
+                _this.controllables.forEachAlive(function (c) {
+                    c.purgeBehaviors();
+                }, _this);
+            };
             this.ghost = ghost;
         };
         Map1.prototype.update = function () {

@@ -17,6 +17,7 @@ module GhostMansion {
         public onStun;
         public onPanic;
         public onNormal;
+        public onDeath;
 
         constructor(g, x, y, k) {
             super(g, x, y, k);
@@ -34,10 +35,15 @@ module GhostMansion {
             return this.behaviors[key];
         }
 
+        purgeBehaviors() {
+            this.behaviors = {};
+        }
+
         deductHealth(amount) {
             if (this.entityState == EntityState.Panicked) return;
             this.health -= amount;
             if (this.health < 0) this.health = 0;
+            if (this.health == 0 && this.onDeath) this.onDeath();
         }
 
         stun(seconds) {

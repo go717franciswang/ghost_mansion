@@ -63,6 +63,15 @@ module GhostMansion {
             ghost.tag = 'ghost';
             ghost.onStun = () => { ghost.alpha = 1; };
             ghost.onNormal = () => { ghost.alpha = 0; };
+            ghost.onDeath = () => {
+                var style = { font: '32px Arial' };
+                var text = this.add.text(this.world.centerX, this.world.centerY, 'You WIN', style);
+                text.anchor.set(0.5);
+                text.align = 'center';
+                this.controllables.forEachAlive((c) => {
+                    c.purgeBehaviors();
+                }, this);
+            };
             this.ghost = ghost;
         }
 
