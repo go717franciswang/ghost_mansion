@@ -45,8 +45,17 @@ module GhostMansion {
 
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
-                // TODO: tween to new direction instead of abruptly changing direciton
-                this.direction = Math.atan2(v.y, v.x);
+                var newDir = Math.atan2(v.y, v.x);
+                var d = Math.abs(newDir - this.direction);
+                if (d < Math.PI) {
+                    var mag = Math.min(d, Math.PI/2);
+                    var dir = (newDir - this.direction) / d;
+                    this.direction += mag*dir*this.game.time.physicsElapsed*10;
+                } else {
+                    var mag = Math.min(2*Math.PI - d, Math.PI/2);
+                    var dir = -(newDir - this.direction) / d;
+                    this.direction += mag*dir*this.game.time.physicsElapsed*10;
+                }
             }
         }
     }
