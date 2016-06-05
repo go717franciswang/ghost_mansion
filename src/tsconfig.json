@@ -11,6 +11,7 @@
         "flashlight",
         "vicinity_ring",
         "controllable_sprite",
+        "network_selection",
         "map1.ts"
     ]
 }

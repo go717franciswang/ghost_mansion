@@ -60,7 +60,6 @@ var GhostMansion;
             this.sprite.move(vx, vy);
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
-                // TODO: tween to new direction instead of abruptly changing direciton
                 var newDir = Math.atan2(v.y, v.x);
                 var d = Math.abs(newDir - this.direction);
                 if (d < Math.PI) {
@@ -631,15 +630,46 @@ var GhostMansion;
     GhostMansion.Map1 = Map1;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var NetworkSelection = (function (_super) {
+        __extends(NetworkSelection, _super);
+        function NetworkSelection() {
+            _super.apply(this, arguments);
+        }
+        NetworkSelection.prototype.create = function () {
+            this.addButton(this.world.centerX, this.world.centerY - 20, 'Local', 'Preloader');
+            this.addButton(this.world.centerX, this.world.centerY + 20, 'Networked', null);
+        };
+        NetworkSelection.prototype.addButton = function (x, y, text, newState) {
+            var _this = this;
+            var style = { font: '32px Arial', fill: '#ffffff' };
+            if (newState == null)
+                style.fill = '#333333';
+            var button = this.add.text(x, y, text, style);
+            button.anchor.set(0.5);
+            button.inputEnabled = true;
+            button.events.onInputUp.add(function () {
+                _this.game.state.start(newState);
+            }, this);
+            return button;
+        };
+        return NetworkSelection;
+    }(Phaser.State));
+    GhostMansion.NetworkSelection = NetworkSelection;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
 /// <reference path="./preloader.ts"/>
 /// <reference path="./map1.ts"/>
+/// <reference path="./network_selection.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     function startGame() {
         var game = new Phaser.Game(320, 240, Phaser.AUTO, 'container');
         game.state.add('Preloader', GhostMansion.Preloader);
         game.state.add('Map1', GhostMansion.Map1);
-        game.state.start('Preloader');
+        game.state.add('NetworkSelection', GhostMansion.NetworkSelection);
+        game.state.start('NetworkSelection');
     }
     GhostMansion.startGame = startGame;
 })(GhostMansion || (GhostMansion = {}));
