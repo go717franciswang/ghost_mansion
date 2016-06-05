@@ -45,13 +45,8 @@ module GhostMansion {
 
             var v = this.sprite.body.velocity;
             if (v.x != 0 || v.y != 0) {
-                if (v.x == 0) {
-                    if (v.y > 0) this.direction = Math.PI/2;
-                    else this.direction = -Math.PI/2;
-                } else {
-                    this.direction = Math.atan(v.y/v.x);
-                    if (v.x < 0) this.direction += Math.PI;
-                }
+                // TODO: tween to new direction instead of abruptly changing direciton
+                this.direction = Math.atan2(v.y, v.x);
             }
         }
     }
