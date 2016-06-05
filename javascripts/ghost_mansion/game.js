@@ -80,15 +80,126 @@ var GhostMansion;
 /// <reference path="./phaser.d.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
+    var ValueBar = (function (_super) {
+        __extends(ValueBar, _super);
+        function ValueBar(game, color, x, y, valueFunc, valueFuncContext) {
+            _super.call(this, game, x, y, null);
+            this.valueFunc = valueFunc;
+            this.valueFuncContext = valueFuncContext;
+            this.maxWidth = 20;
+            var rect = game.make.graphics(0, 0);
+            rect.beginFill(color);
+            rect.drawRect(-10, -2, this.maxWidth, 4);
+            rect.endFill();
+            var texture = rect.generateTexture();
+            this.loadTexture(texture);
+            this.anchor.setTo(0.5);
+        }
+        ValueBar.prototype.postUpdate = function () {
+            this.width = this.maxWidth * this.getValue() / 100;
+        };
+        ValueBar.prototype.getValue = function () {
+            return this.valueFunc.call(this.valueFuncContext);
+        };
+        return ValueBar;
+    }(Phaser.Sprite));
+    GhostMansion.ValueBar = ValueBar;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./value_bar.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    (function (EntityState) {
+        EntityState[EntityState["Normal"] = 0] = "Normal";
+        EntityState[EntityState["Stunned"] = 1] = "Stunned";
+        EntityState[EntityState["Panicked"] = 2] = "Panicked";
+    })(GhostMansion.EntityState || (GhostMansion.EntityState = {}));
+    var EntityState = GhostMansion.EntityState;
+    var ControllableSprite = (function (_super) {
+        __extends(ControllableSprite, _super);
+        function ControllableSprite(g, x, y, k) {
+            var _this = this;
+            _super.call(this, g, x, y, k);
+            this.behaviors = {};
+            this.health = 100;
+            this.tag = 'human';
+            this.entityState = EntityState.Normal;
+            this.healthBar = new GhostMansion.ValueBar(g, 0xff0000, 0, -this.height * 1.1, function () {
+                return _this.health;
+            }, this);
+            this.addChild(this.healthBar);
+        }
+        ControllableSprite.prototype.setBehavior = function (key, behavior) {
+            this.behaviors[key] = behavior;
+        };
+        ControllableSprite.prototype.getBehavior = function (key) {
+            return this.behaviors[key];
+        };
+        ControllableSprite.prototype.purgeBehaviors = function () {
+            this.behaviors = {};
+        };
+        ControllableSprite.prototype.deductHealth = function (amount) {
+            if (this.entityState == EntityState.Panicked)
+                return;
+            this.health -= amount;
+            if (this.health < 0)
+                this.health = 0;
+            if (this.health == 0 && this.onDeath)
+                this.onDeath();
+        };
+        ControllableSprite.prototype.stun = function (seconds) {
+            var _this = this;
+            if (this.entityState != EntityState.Normal)
+                return;
+            this.entityState = EntityState.Stunned;
+            if (this.onStun)
+                this.onStun();
+            this.loadTexture(this.game.state.states['Map1'].boxStunned);
+            this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
+                _this.entityState = EntityState.Panicked;
+                if (_this.onPanic)
+                    _this.onPanic();
+                _this.loadTexture(_this.game.state.states['Map1'].boxPanicked);
+                _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
+                    _this.entityState = EntityState.Normal;
+                    if (_this.onNormal)
+                        _this.onNormal();
+                    _this.loadTexture(_this.game.state.states['Map1'].box);
+                });
+            }, this);
+        };
+        ControllableSprite.prototype.move = function (vx, vy) {
+            if (this.entityState == EntityState.Stunned) {
+                this.body.static = true;
+                this.body.velocity.x = 0;
+                this.body.velocity.y = 0;
+            }
+            else {
+                this.body.static = false;
+                this.body.velocity.x = vx;
+                this.body.velocity.y = vy;
+            }
+        };
+        return ControllableSprite;
+    }(Phaser.Sprite));
+    GhostMansion.ControllableSprite = ControllableSprite;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./controllable_sprite.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
     var AiController = (function () {
         function AiController(sprite, game) {
             this.sprite = sprite;
             this.game = game;
-            this.debugLine = this.game.add.graphics(0, 0);
+            this.path = [];
             this.step = 0;
+            // this.debugLine = this.game.add.graphics(0, 0);
             this.updatePath();
         }
         AiController.prototype.update = function () {
+            if (this.path.length == 0)
+                return;
             var p0 = this.tileMapPos2WordPos(this.path[this.step]);
             var p1 = this.tileMapPos2WordPos(this.path[this.step + 1]);
             var p = p0;
@@ -119,6 +230,8 @@ var GhostMansion;
                     targetTileIds = this.genTargetTileIdsLurk();
                 }
             }
+            if (Object.keys(targetTileIds).length == 0)
+                return;
             var newPath = this.bfs(targetTileIds).path;
             if (this.path && this.path[this.step] != newPath[0])
                 this.step = 1;
@@ -159,7 +272,7 @@ var GhostMansion;
             compareTiles.forEach(function (t) {
                 var dx = tile.x - t.x;
                 var dy = tile.y - t.y;
-                if (dx * dx + dy * dy < distance * distance)
+                if (dx * dx + dy * dy >= distance * distance)
                     count++;
             });
             return count;
@@ -189,7 +302,7 @@ var GhostMansion;
             this.game.map.forEach(function (tile) {
                 if (tile.index == -1) {
                     if (_this.furtherThan(tile, humans, 4) == humans.length
-                        && _this.closerThan(tile, humans, 7) > 0) {
+                        && _this.closerThan(tile, humans, 6) > 0) {
                         targetTileIds[_this.tile2id(tile)] = true;
                     }
                 }
@@ -256,34 +369,6 @@ var GhostMansion;
         return AiController;
     }());
     GhostMansion.AiController = AiController;
-})(GhostMansion || (GhostMansion = {}));
-/// <reference path="./phaser.d.ts"/>
-var GhostMansion;
-(function (GhostMansion) {
-    var ValueBar = (function (_super) {
-        __extends(ValueBar, _super);
-        function ValueBar(game, color, x, y, valueFunc, valueFuncContext) {
-            _super.call(this, game, x, y, null);
-            this.valueFunc = valueFunc;
-            this.valueFuncContext = valueFuncContext;
-            this.maxWidth = 20;
-            var rect = game.make.graphics(0, 0);
-            rect.beginFill(color);
-            rect.drawRect(-10, -2, this.maxWidth, 4);
-            rect.endFill();
-            var texture = rect.generateTexture();
-            this.loadTexture(texture);
-            this.anchor.setTo(0.5);
-        }
-        ValueBar.prototype.postUpdate = function () {
-            this.width = this.maxWidth * this.getValue() / 100;
-        };
-        ValueBar.prototype.getValue = function () {
-            return this.valueFunc.call(this.valueFuncContext);
-        };
-        return ValueBar;
-    }(Phaser.Sprite));
-    GhostMansion.ValueBar = ValueBar;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./visibility_polygon.d.ts"/>
@@ -394,85 +479,6 @@ var GhostMansion;
         return VicinityRing;
     }());
     GhostMansion.VicinityRing = VicinityRing;
-})(GhostMansion || (GhostMansion = {}));
-/// <reference path="./phaser.d.ts"/>
-/// <reference path="./value_bar.ts"/>
-var GhostMansion;
-(function (GhostMansion) {
-    (function (EntityState) {
-        EntityState[EntityState["Normal"] = 0] = "Normal";
-        EntityState[EntityState["Stunned"] = 1] = "Stunned";
-        EntityState[EntityState["Panicked"] = 2] = "Panicked";
-    })(GhostMansion.EntityState || (GhostMansion.EntityState = {}));
-    var EntityState = GhostMansion.EntityState;
-    var ControllableSprite = (function (_super) {
-        __extends(ControllableSprite, _super);
-        function ControllableSprite(g, x, y, k) {
-            var _this = this;
-            _super.call(this, g, x, y, k);
-            this.behaviors = {};
-            this.health = 100;
-            this.tag = 'human';
-            this.entityState = EntityState.Normal;
-            this.healthBar = new GhostMansion.ValueBar(g, 0xff0000, 0, -this.height * 1.1, function () {
-                return _this.health;
-            }, this);
-            this.addChild(this.healthBar);
-        }
-        ControllableSprite.prototype.setBehavior = function (key, behavior) {
-            this.behaviors[key] = behavior;
-        };
-        ControllableSprite.prototype.getBehavior = function (key) {
-            return this.behaviors[key];
-        };
-        ControllableSprite.prototype.purgeBehaviors = function () {
-            this.behaviors = {};
-        };
-        ControllableSprite.prototype.deductHealth = function (amount) {
-            if (this.entityState == EntityState.Panicked)
-                return;
-            this.health -= amount;
-            if (this.health < 0)
-                this.health = 0;
-            if (this.health == 0 && this.onDeath)
-                this.onDeath();
-        };
-        ControllableSprite.prototype.stun = function (seconds) {
-            var _this = this;
-            if (this.entityState != EntityState.Normal)
-                return;
-            this.entityState = EntityState.Stunned;
-            if (this.onStun)
-                this.onStun();
-            this.loadTexture(this.game.state.states['Map1'].boxStunned);
-            this.game.time.events.add(Phaser.Timer.SECOND * seconds, function () {
-                _this.entityState = EntityState.Panicked;
-                if (_this.onPanic)
-                    _this.onPanic();
-                _this.loadTexture(_this.game.state.states['Map1'].boxPanicked);
-                _this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
-                    _this.entityState = EntityState.Normal;
-                    if (_this.onNormal)
-                        _this.onNormal();
-                    _this.loadTexture(_this.game.state.states['Map1'].box);
-                });
-            }, this);
-        };
-        ControllableSprite.prototype.move = function (vx, vy) {
-            if (this.entityState == EntityState.Stunned) {
-                this.body.static = true;
-                this.body.velocity.x = 0;
-                this.body.velocity.y = 0;
-            }
-            else {
-                this.body.static = false;
-                this.body.velocity.x = vx;
-                this.body.velocity.y = vy;
-            }
-        };
-        return ControllableSprite;
-    }(Phaser.Sprite));
-    GhostMansion.ControllableSprite = ControllableSprite;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./input_controller.ts"/>

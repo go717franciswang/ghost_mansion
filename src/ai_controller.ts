@@ -1,18 +1,19 @@
 /// <reference path="./phaser.d.ts"/>
+/// <reference path="./controllable_sprite.ts"/>
 
 module GhostMansion {
     export class AiController {
-        private path: any[];
-        private step: number;
+        private path: any[] = [];
+        private step: number = 0;
         private debugLine: any;
 
         constructor(private sprite, private game) {
-            this.debugLine = this.game.add.graphics(0, 0);
-            this.step = 0;
+            // this.debugLine = this.game.add.graphics(0, 0);
             this.updatePath();
         }
 
         update() {
+            if (this.path.length == 0) return;
             var p0 = this.tileMapPos2WordPos(this.path[this.step]);
             var p1 = this.tileMapPos2WordPos(this.path[this.step+1]);
             var p = p0;
@@ -43,6 +44,7 @@ module GhostMansion {
                     targetTileIds = this.genTargetTileIdsLurk();
                 }
             }
+            if (Object.keys(targetTileIds).length == 0) return;
 
             var newPath = this.bfs(targetTileIds).path;
             if (this.path && this.path[this.step] != newPath[0]) this.step = 1;
@@ -86,7 +88,7 @@ module GhostMansion {
             compareTiles.forEach((t) => {
                 var dx = tile.x - t.x;
                 var dy = tile.y - t.y;
-                if (dx*dx + dy*dy < distance*distance) count++;
+                if (dx*dx + dy*dy >= distance*distance) count++;
             });
             return count;
         }
@@ -117,7 +119,7 @@ module GhostMansion {
             this.game.map.forEach((tile) => {
                 if (tile.index == -1) {
                     if (this.furtherThan(tile, humans, 4) == humans.length
-                       && this.closerThan(tile, humans, 7) > 0) {
+                       && this.closerThan(tile, humans, 6) > 0) {
                         targetTileIds[this.tile2id(tile)] = true;
                     }
                 }
