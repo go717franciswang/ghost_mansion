@@ -84,7 +84,7 @@ var GhostMansion;
         function AiController(sprite, game) {
             this.sprite = sprite;
             this.game = game;
-            // this.debugLine = this.game.add.graphics(0, 0);
+            this.debugLine = this.game.add.graphics(0, 0);
             this.step = 0;
             this.updatePath();
         }
@@ -109,7 +109,17 @@ var GhostMansion;
         };
         AiController.prototype.updatePath = function () {
             var _this = this;
-            var newPath = this.bfs().path;
+            var targetTileIds;
+            if (this.sprite.entityState != GhostMansion.EntityState.Normal) {
+                targetTileIds = this.genTargetTileIdsEscape();
+            }
+            else {
+                targetTileIds = this.genTargetTileIdsChaseLowFlashlight();
+                if (Object.keys(targetTileIds).length == 0) {
+                    targetTileIds = this.genTargetTileIdsLurk();
+                }
+            }
+            var newPath = this.bfs(targetTileIds).path;
             if (this.path && this.path[this.step] != newPath[0])
                 this.step = 1;
             this.path = newPath;
@@ -126,15 +136,68 @@ var GhostMansion;
                 }
             }
         };
-        AiController.prototype.bfs = function () {
+        AiController.prototype.genTargetTileIdsEscape = function () {
             var _this = this;
-            var myTile = this.getTile(this.sprite);
-            var targetTiles = [];
+            var targetTileIds = {};
+            var humans = [];
             this.game.controllables.forEachAlive(function (controllable) {
                 if (controllable != _this.sprite) {
-                    targetTiles.push(_this.getTile(controllable));
+                    humans.push(_this.getTile(controllable));
                 }
             });
+            this.game.map.forEach(function (tile) {
+                if (tile.index == -1) {
+                    if (_this.furtherThan(tile, humans, 10) == humans.length) {
+                        targetTileIds[_this.tile2id(tile)] = true;
+                    }
+                }
+            }, this, 0, 0, this.game.map.width, this.game.map.height, this.game.walls);
+            return targetTileIds;
+        };
+        AiController.prototype.furtherThan = function (tile, compareTiles, distance) {
+            var count = 0;
+            compareTiles.forEach(function (t) {
+                var dx = tile.x - t.x;
+                var dy = tile.y - t.y;
+                if (dx * dx + dy * dy < distance * distance)
+                    count++;
+            });
+            return count;
+        };
+        AiController.prototype.closerThan = function (tile, compareTiles, distance) {
+            return compareTiles.length - this.furtherThan(tile, compareTiles, distance);
+        };
+        AiController.prototype.genTargetTileIdsChaseLowFlashlight = function () {
+            var _this = this;
+            var targetTileIds = {};
+            this.game.controllables.forEachAlive(function (controllable) {
+                if (controllable != _this.sprite && controllable.getBehavior('flashlight').health < 20) {
+                    targetTileIds[_this.tile2id(_this.getTile(controllable))] = true;
+                }
+            });
+            return targetTileIds;
+        };
+        AiController.prototype.genTargetTileIdsLurk = function () {
+            var _this = this;
+            var targetTileIds = {};
+            var humans = [];
+            this.game.controllables.forEachAlive(function (controllable) {
+                if (controllable != _this.sprite) {
+                    humans.push(_this.getTile(controllable));
+                }
+            });
+            this.game.map.forEach(function (tile) {
+                if (tile.index == -1) {
+                    if (_this.furtherThan(tile, humans, 4) == humans.length
+                        && _this.closerThan(tile, humans, 7) > 0) {
+                        targetTileIds[_this.tile2id(tile)] = true;
+                    }
+                }
+            }, this, 0, 0, this.game.map.width, this.game.map.height, this.game.walls);
+            return targetTileIds;
+        };
+        AiController.prototype.bfs = function (targetTileIds) {
+            var myTile = this.getTile(this.sprite);
             var edges = [myTile];
             var prevTile = {};
             prevTile[this.tile2id(myTile)] = -1;
@@ -143,10 +206,8 @@ var GhostMansion;
                 for (var i = 0; i < edges.length; i++) {
                     var e = edges[i];
                     var id = this.tile2id(e);
-                    for (var j = 0; j < targetTiles.length; j++) {
-                        if (targetTiles[j].x == e.x && targetTiles[j].y == e.y) {
-                            return { reached: e, path: this.computePath(e, prevTile) };
-                        }
+                    if (targetTileIds[id]) {
+                        return { reached: e, path: this.computePath(e, prevTile) };
                     }
                     var tiles = [
                         this.game.map.getTileAbove(this.game.walls.index, e.x, e.y),

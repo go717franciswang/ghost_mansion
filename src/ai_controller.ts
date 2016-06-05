@@ -7,7 +7,7 @@ module GhostMansion {
         private debugLine: any;
 
         constructor(private sprite, private game) {
-            // this.debugLine = this.game.add.graphics(0, 0);
+            this.debugLine = this.game.add.graphics(0, 0);
             this.step = 0;
             this.updatePath();
         }
@@ -34,7 +34,17 @@ module GhostMansion {
         }
 
         updatePath() {
-            var newPath = this.bfs().path;
+            var targetTileIds;
+            if (this.sprite.entityState != EntityState.Normal) {
+                targetTileIds = this.genTargetTileIdsEscape();
+            } else {
+                targetTileIds = this.genTargetTileIdsChaseLowFlashlight();
+                if (Object.keys(targetTileIds).length == 0) {
+                    targetTileIds = this.genTargetTileIdsLurk();
+                }
+            }
+
+            var newPath = this.bfs(targetTileIds).path;
             if (this.path && this.path[this.step] != newPath[0]) this.step = 1;
             this.path = newPath;
             if (this.path.length == 1) this.step = 0; // in case target is in the same tile
@@ -51,15 +61,73 @@ module GhostMansion {
             }
         }
 
-        bfs() {
-            var myTile = this.getTile(this.sprite);
-            var targetTiles = [];
+        genTargetTileIdsEscape() {
+            var targetTileIds = {};
+            var humans = [];
             this.game.controllables.forEachAlive((controllable) =>{
                 if (controllable != this.sprite) {
-                    targetTiles.push(this.getTile(controllable));
+                    humans.push(this.getTile(controllable));
                 }
             });
 
+            this.game.map.forEach((tile) => {
+                if (tile.index == -1) {
+                    if (this.furtherThan(tile, humans, 10) == humans.length) {
+                        targetTileIds[this.tile2id(tile)] = true;
+                    }
+                }
+            }, this, 0, 0, this.game.map.width, this.game.map.height, this.game.walls);
+
+            return targetTileIds;
+        }
+
+        furtherThan(tile, compareTiles, distance) {
+            var count = 0;
+            compareTiles.forEach((t) => {
+                var dx = tile.x - t.x;
+                var dy = tile.y - t.y;
+                if (dx*dx + dy*dy < distance*distance) count++;
+            });
+            return count;
+        }
+
+        closerThan(tile, compareTiles, distance) {
+            return compareTiles.length - this.furtherThan(tile, compareTiles, distance);
+        }
+
+        genTargetTileIdsChaseLowFlashlight() {
+            var targetTileIds = {};
+            this.game.controllables.forEachAlive((controllable) =>{
+                if (controllable != this.sprite && controllable.getBehavior('flashlight').health < 20) {
+                    targetTileIds[this.tile2id(this.getTile(controllable))] = true;
+                }
+            });
+            return targetTileIds;
+        }
+
+        genTargetTileIdsLurk() {
+            var targetTileIds = {};
+            var humans = [];
+            this.game.controllables.forEachAlive((controllable) =>{
+                if (controllable != this.sprite) {
+                    humans.push(this.getTile(controllable));
+                }
+            });
+
+            this.game.map.forEach((tile) => {
+                if (tile.index == -1) {
+                    if (this.furtherThan(tile, humans, 4) == humans.length
+                       && this.closerThan(tile, humans, 7) > 0) {
+                        targetTileIds[this.tile2id(tile)] = true;
+                    }
+                }
+            }, this, 0, 0, this.game.map.width, this.game.map.height, this.game.walls);
+
+            return targetTileIds;
+        }
+
+        bfs(targetTileIds) {
+            var myTile = this.getTile(this.sprite);
             var edges = [myTile];
             var prevTile = {};
             prevTile[this.tile2id(myTile)] = -1;
@@ -69,10 +137,8 @@ module GhostMansion {
                 for (var i = 0; i < edges.length; i++){
                     var e = edges[i];
                     var id = this.tile2id(e);
-                    for (var j = 0; j < targetTiles.length; j++){
-                        if (targetTiles[j].x == e.x && targetTiles[j].y == e.y) {
-                            return { reached: e, path: this.computePath(e, prevTile) };
-                        }
+                    if (targetTileIds[id]) {
+                        return { reached: e, path: this.computePath(e, prevTile) };
                     }
 
                     var tiles = [
