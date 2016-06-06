@@ -632,36 +632,64 @@ var GhostMansion;
 /// <reference path="./phaser.d.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
+    var Common = (function () {
+        function Common() {
+        }
+        Common.addButton = function (game, x, y, text, newState) {
+            var style = { font: '32px Arial', fill: '#ffffff' };
+            if (newState == null)
+                style.fill = '#333333';
+            var button = game.add.text(x, y, text, style);
+            button.anchor.set(0.5);
+            button.inputEnabled = true;
+            button.events.onInputUp.add(function () {
+                game.state.start(newState);
+            }, this);
+            return button;
+        };
+        return Common;
+    }());
+    GhostMansion.Common = Common;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./common.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
     var NetworkSelection = (function (_super) {
         __extends(NetworkSelection, _super);
         function NetworkSelection() {
             _super.apply(this, arguments);
         }
         NetworkSelection.prototype.create = function () {
-            this.addButton(this.world.centerX, this.world.centerY - 20, 'Local', 'Preloader');
-            this.addButton(this.world.centerX, this.world.centerY + 20, 'Networked', null);
-        };
-        NetworkSelection.prototype.addButton = function (x, y, text, newState) {
-            var _this = this;
-            var style = { font: '32px Arial', fill: '#ffffff' };
-            if (newState == null)
-                style.fill = '#333333';
-            var button = this.add.text(x, y, text, style);
-            button.anchor.set(0.5);
-            button.inputEnabled = true;
-            button.events.onInputUp.add(function () {
-                _this.game.state.start(newState);
-            }, this);
-            return button;
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, 'Local', 'LocalSelection');
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, 'Networked', null);
         };
         return NetworkSelection;
     }(Phaser.State));
     GhostMansion.NetworkSelection = NetworkSelection;
 })(GhostMansion || (GhostMansion = {}));
 /// <reference path="./phaser.d.ts"/>
+/// <reference path="./common.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
+    var LocalSelection = (function (_super) {
+        __extends(LocalSelection, _super);
+        function LocalSelection() {
+            _super.apply(this, arguments);
+        }
+        LocalSelection.prototype.create = function () {
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, '1 Player', 'Preloader');
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, '2 Players', 'Preloader');
+        };
+        return LocalSelection;
+    }(Phaser.State));
+    GhostMansion.LocalSelection = LocalSelection;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
 /// <reference path="./preloader.ts"/>
 /// <reference path="./map1.ts"/>
 /// <reference path="./network_selection.ts"/>
+/// <reference path="./local_selection.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     function startGame() {
@@ -669,6 +697,7 @@ var GhostMansion;
         game.state.add('Preloader', GhostMansion.Preloader);
         game.state.add('Map1', GhostMansion.Map1);
         game.state.add('NetworkSelection', GhostMansion.NetworkSelection);
+        game.state.add('LocalSelection', GhostMansion.LocalSelection);
         game.state.start('NetworkSelection');
     }
     GhostMansion.startGame = startGame;

@@ -12,6 +12,8 @@
         "vicinity_ring",
         "controllable_sprite",
         "network_selection",
+        "local_selection",
+        "common",
         "map1.ts"
     ]
 }
