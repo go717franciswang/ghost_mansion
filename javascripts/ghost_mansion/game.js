@@ -11,13 +11,16 @@ var GhostMansion;
         function Preloader() {
             _super.apply(this, arguments);
         }
+        Preloader.prototype.init = function (setting) {
+            this.setting = setting;
+        };
         Preloader.prototype.preload = function () {
             this.load.path = '/resources/ghost_mansion/';
             this.load.tilemap('map', 'test.json?r=' + Math.random(), null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles', 'biomechamorphs_001.png');
         };
         Preloader.prototype.create = function () {
-            this.game.state.start('Map1');
+            this.game.state.start('Map1', true, false, this.setting);
         };
         return Preloader;
     }(Phaser.State));
@@ -510,6 +513,9 @@ var GhostMansion;
             _super.apply(this, arguments);
             this.lives = 3;
         }
+        Map1.prototype.init = function (setting) {
+            this.playerCount = setting.playerCount;
+        };
         Map1.prototype.create = function () {
             var _this = this;
             this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -524,36 +530,23 @@ var GhostMansion;
             this.walls = this.map.createLayer('walls');
             background.resizeWorld();
             this.walls.resizeWorld();
-            var player = new GhostMansion.ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
-            player.anchor.setTo(0.5);
-            this.game.add.existing(player);
-            this.physics.enable(player);
-            player.body.collideWorldBounds = true;
             this.controllables = this.add.group();
-            this.controllables.add(player);
-            player.setBehavior('inputController', new GhostMansion.InputController(player, this, {
+            this.addPlayer({
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
                 flashlight: Phaser.KeyCode.ENTER
-            }));
-            player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
-            player.setBehavior('vicinityRing', new GhostMansion.VicinityRing(player, this));
-            player.onDeath = function () {
-                _this.lives--;
-                if (_this.lives <= 0) {
-                    _this.displayMessage('You lose');
-                    _this.gameOver();
-                }
-                else {
-                    var text = _this.displayMessage('You have ' + _this.lives + ' lives left');
-                    var tween = _this.add.tween(text).to({ alpha: 0 }, 2000, Phaser.Easing.Linear.None, true);
-                    tween.onComplete.add(function () { text.destroy(); });
-                    player.health = 100;
-                    player.getBehavior('flashlight').health = 100;
-                }
-            };
+            });
+            if (this.playerCount == 2) {
+                this.addPlayer({
+                    left: Phaser.KeyCode.A,
+                    right: Phaser.KeyCode.D,
+                    up: Phaser.KeyCode.W,
+                    down: Phaser.KeyCode.S,
+                    flashlight: Phaser.KeyCode.SPACEBAR
+                });
+            }
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
             ghost.fadeOut();
@@ -570,6 +563,33 @@ var GhostMansion;
                 _this.gameOver();
             };
             this.ghost = ghost;
+        };
+        Map1.prototype.addPlayer = function (keyMap) {
+            var _this = this;
+            var player = new GhostMansion.ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
+            player.anchor.setTo(0.5);
+            this.game.add.existing(player);
+            this.physics.enable(player);
+            player.body.collideWorldBounds = true;
+            this.controllables.add(player);
+            player.setBehavior('inputController', new GhostMansion.InputController(player, this, keyMap));
+            player.setBehavior('flashlight', new GhostMansion.FlashLight(player, this));
+            player.setBehavior('vicinityRing', new GhostMansion.VicinityRing(player, this));
+            player.onDeath = function () {
+                _this.lives--;
+                if (_this.lives <= 0) {
+                    _this.displayMessage('You lose');
+                    _this.gameOver();
+                }
+                else {
+                    var text = _this.displayMessage('You have ' + _this.lives + ' lives left');
+                    var tween = _this.add.tween(text).to({ alpha: 0 }, 2000, Phaser.Easing.Linear.None, true);
+                    tween.onComplete.add(function () { text.destroy(); });
+                    player.health = 100;
+                    player.getBehavior('flashlight').health = 100;
+                }
+            };
+            return player;
         };
         Map1.prototype.gameOver = function () {
             this.controllables.forEachAlive(function (c) {
@@ -647,7 +667,8 @@ var GhostMansion;
     var Common = (function () {
         function Common() {
         }
-        Common.addButton = function (game, x, y, text, newState) {
+        Common.addButton = function (game, x, y, text, newState, a1) {
+            if (a1 === void 0) { a1 = null; }
             var style = { font: '32px Arial', fill: '#ffffff' };
             if (newState == null)
                 style.fill = '#333333';
@@ -655,7 +676,7 @@ var GhostMansion;
             button.anchor.set(0.5);
             button.inputEnabled = true;
             button.events.onInputUp.add(function () {
-                game.state.start(newState);
+                game.state.start(newState, true, false, a1);
             }, this);
             return button;
         };
@@ -690,8 +711,8 @@ var GhostMansion;
             _super.apply(this, arguments);
         }
         LocalSelection.prototype.create = function () {
-            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, '1 Player', 'Preloader');
-            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, '2 Players', 'Preloader');
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, '1 Player', 'Preloader', { playerCount: 1 });
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, '2 Players', 'Preloader', { playerCount: 2 });
         };
         return LocalSelection;
     }(Phaser.State));

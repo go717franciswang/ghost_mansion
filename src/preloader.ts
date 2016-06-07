@@ -2,6 +2,12 @@
 
 module GhostMansion {
     export class Preloader extends Phaser.State {
+        private setting: any;
+
+        init(setting) {
+            this.setting = setting;
+        }
+
         preload() {
             this.load.path = '/resources/ghost_mansion/';
             this.load.tilemap('map', 'test.json?r='+Math.random(), null, Phaser.Tilemap.TILED_JSON);
@@ -9,7 +15,7 @@ module GhostMansion {
         }
 
         create() {
-            this.game.state.start('Map1');
+            this.game.state.start('Map1', true, false, this.setting);
         }
     }
 }

@@ -15,6 +15,11 @@ module GhostMansion {
         boxStunned: any;
         boxPanicked: any;
         private lives = 3;
+        private playerCount: number;
+
+        init(setting) {
+            this.playerCount = setting.playerCount;
+        }
 
         create() {
             this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -33,36 +38,22 @@ module GhostMansion {
             background.resizeWorld();
             this.walls.resizeWorld();
 
-            var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
-            player.anchor.setTo(0.5);
-            this.game.add.existing(player);
-            this.physics.enable(player);
-            player.body.collideWorldBounds = true;
             this.controllables = this.add.group();
-            this.controllables.add(player);
-
-            player.setBehavior('inputController', new InputController(player, this, {
+            this.addPlayer({
                 left: Phaser.KeyCode.LEFT,
                 right: Phaser.KeyCode.RIGHT,
                 up: Phaser.KeyCode.UP,
                 down: Phaser.KeyCode.DOWN,
                 flashlight: Phaser.KeyCode.ENTER
-            }));
-
-            player.setBehavior('flashlight', new FlashLight(player, this));
-            player.setBehavior('vicinityRing', new VicinityRing(player, this));
-            player.onDeath = () => {
-                this.lives--;
-                if (this.lives <= 0) {
-                    this.displayMessage('You lose');
-                    this.gameOver();
-                } else {
-                    var text = this.displayMessage('You have ' + this.lives + ' lives left');
-                    var tween = this.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
-                    tween.onComplete.add(() => { text.destroy(); });
-                    player.health = 100;
-                    player.getBehavior('flashlight').health = 100;
-                }
+            });
+            if (this.playerCount == 2) {
+                this.addPlayer({
+                    left: Phaser.KeyCode.A,
+                    right: Phaser.KeyCode.D,
+                    up: Phaser.KeyCode.W,
+                    down: Phaser.KeyCode.S,
+                    flashlight: Phaser.KeyCode.SPACEBAR
+                });
             }
 
             var ghost = new ControllableSprite(this.game, 0, 0, this.box);
@@ -82,6 +73,33 @@ module GhostMansion {
                 this.gameOver();
             };
             this.ghost = ghost;
+        }
+
+        addPlayer(keyMap) {
+            var player = new ControllableSprite(this.game, this.world.centerX, this.world.centerY, this.box);
+            player.anchor.setTo(0.5);
+            this.game.add.existing(player);
+            this.physics.enable(player);
+            player.body.collideWorldBounds = true;
+            this.controllables.add(player);
+
+            player.setBehavior('inputController', new InputController(player, this, keyMap));
+            player.setBehavior('flashlight', new FlashLight(player, this));
+            player.setBehavior('vicinityRing', new VicinityRing(player, this));
+            player.onDeath = () => {
+                this.lives--;
+                if (this.lives <= 0) {
+                    this.displayMessage('You lose');
+                    this.gameOver();
+                } else {
+                    var text = this.displayMessage('You have ' + this.lives + ' lives left');
+                    var tween = this.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
+                    tween.onComplete.add(() => { text.destroy(); });
+                    player.health = 100;
+                    player.getBehavior('flashlight').health = 100;
+                }
+            }
+            return player;
         }
 
         gameOver() {
