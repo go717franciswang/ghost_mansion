@@ -67,7 +67,7 @@ module GhostMansion {
 
             var ghost = new ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
-            ghost.alpha = 0;
+            ghost.fadeOut();
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
@@ -75,8 +75,8 @@ module GhostMansion {
 
             ghost.setBehavior('AI', new AiController(ghost, this));
             ghost.tag = 'ghost';
-            ghost.onStun = () => { ghost.alpha = 1; };
-            ghost.onNormal = () => { ghost.alpha = 0; };
+            ghost.onStun = ghost.fadeIn;
+            ghost.onNormal = ghost.fadeOut;
             ghost.onDeath = () => {
                 this.displayMessage('You win');
                 this.gameOver();
@@ -137,6 +137,10 @@ module GhostMansion {
             if (human) {
                 human.deductHealth(this.time.physicsElapsed*100);
                 human.stun(3);
+                ghost.fadeIn();
+                this.time.events.add(Phaser.Timer.SECOND*3, () => {
+                    ghost.fadeOut();
+                });
             }
         }
 

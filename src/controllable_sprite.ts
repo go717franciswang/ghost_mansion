@@ -63,6 +63,16 @@ module GhostMansion {
             }, this);
         }
 
+        fadeIn() {
+            var tween = this.game.add.tween(this);
+            tween.to({ alpha: 1 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+
+        fadeOut() {
+            var tween = this.game.add.tween(this);
+            tween.to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+
         move(vx, vy) {
             if (this.entityState == EntityState.Stunned) {
                 this.body.static = true;

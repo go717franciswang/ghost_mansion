@@ -169,6 +169,14 @@ var GhostMansion;
                 });
             }, this);
         };
+        ControllableSprite.prototype.fadeIn = function () {
+            var tween = this.game.add.tween(this);
+            tween.to({ alpha: 1 }, 1000, Phaser.Easing.Linear.None, true);
+        };
+        ControllableSprite.prototype.fadeOut = function () {
+            var tween = this.game.add.tween(this);
+            tween.to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        };
         ControllableSprite.prototype.move = function (vx, vy) {
             if (this.entityState == EntityState.Stunned) {
                 this.body.static = true;
@@ -548,15 +556,15 @@ var GhostMansion;
             };
             var ghost = new GhostMansion.ControllableSprite(this.game, 0, 0, this.box);
             ghost.anchor.setTo(0.5);
-            ghost.alpha = 0;
+            ghost.fadeOut();
             this.game.add.existing(ghost);
             this.physics.enable(ghost);
             ghost.body.collideWorldBounds = true;
             this.controllables.add(ghost);
             ghost.setBehavior('AI', new GhostMansion.AiController(ghost, this));
             ghost.tag = 'ghost';
-            ghost.onStun = function () { ghost.alpha = 1; };
-            ghost.onNormal = function () { ghost.alpha = 0; };
+            ghost.onStun = ghost.fadeIn;
+            ghost.onNormal = ghost.fadeOut;
             ghost.onDeath = function () {
                 _this.displayMessage('You win');
                 _this.gameOver();
@@ -611,6 +619,10 @@ var GhostMansion;
             if (human) {
                 human.deductHealth(this.time.physicsElapsed * 100);
                 human.stun(3);
+                ghost.fadeIn();
+                this.time.events.add(Phaser.Timer.SECOND * 3, function () {
+                    ghost.fadeOut();
+                });
             }
         };
         Map1.prototype.processCallback = function (a, b) {
