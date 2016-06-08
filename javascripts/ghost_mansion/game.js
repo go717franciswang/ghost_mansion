@@ -174,7 +174,7 @@ var GhostMansion;
         };
         ControllableSprite.prototype.fadeIn = function () {
             var tween = this.game.add.tween(this);
-            tween.to({ alpha: 1 }, 1000, Phaser.Easing.Linear.None, true);
+            tween.to({ alpha: 1 }, 100, Phaser.Easing.Linear.None, true);
         };
         ControllableSprite.prototype.fadeOut = function () {
             var tween = this.game.add.tween(this);
