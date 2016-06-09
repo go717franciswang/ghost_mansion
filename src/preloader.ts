@@ -10,7 +10,7 @@ module GhostMansion {
 
         preload() {
             this.load.path = '/resources/ghost_mansion/';
-            this.load.tilemap('map', 'test.json?r='+Math.random(), null, Phaser.Tilemap.TILED_JSON);
+            this.load.tilemap('map', this.setting.map + '?r='+Math.random(), null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles', 'biomechamorphs_001.png');
         }
 

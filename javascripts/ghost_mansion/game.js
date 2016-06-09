@@ -16,7 +16,7 @@ var GhostMansion;
         };
         Preloader.prototype.preload = function () {
             this.load.path = '/resources/ghost_mansion/';
-            this.load.tilemap('map', 'test.json?r=' + Math.random(), null, Phaser.Tilemap.TILED_JSON);
+            this.load.tilemap('map', this.setting.map + '?r=' + Math.random(), null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles', 'biomechamorphs_001.png');
         };
         Preloader.prototype.create = function () {
@@ -705,14 +705,39 @@ var GhostMansion;
 /// <reference path="./common.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
+    var MapSelection = (function (_super) {
+        __extends(MapSelection, _super);
+        function MapSelection() {
+            _super.apply(this, arguments);
+        }
+        MapSelection.prototype.init = function (setting) {
+            this.setting = setting;
+        };
+        MapSelection.prototype.create = function () {
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, 'Main Floor', 'Preloader', this.selectMap('main-floor.json'));
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, 'Research Lab', 'Preloader', this.selectMap('research-lab.json'));
+        };
+        MapSelection.prototype.selectMap = function (map) {
+            this.setting.map = map;
+            return this.setting;
+        };
+        return MapSelection;
+    }(Phaser.State));
+    GhostMansion.MapSelection = MapSelection;
+})(GhostMansion || (GhostMansion = {}));
+/// <reference path="./phaser.d.ts"/>
+/// <reference path="./common.ts"/>
+/// <reference path="./map_selection.ts"/>
+var GhostMansion;
+(function (GhostMansion) {
     var LocalSelection = (function (_super) {
         __extends(LocalSelection, _super);
         function LocalSelection() {
             _super.apply(this, arguments);
         }
         LocalSelection.prototype.create = function () {
-            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, '1 Player', 'Preloader', { playerCount: 1 });
-            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, '2 Players', 'Preloader', { playerCount: 2 });
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY - 20, '1 Player', 'MapSelection', { playerCount: 1 });
+            GhostMansion.Common.addButton(this, this.world.centerX, this.world.centerY + 20, '2 Players', 'MapSelection', { playerCount: 2 });
         };
         return LocalSelection;
     }(Phaser.State));
@@ -723,6 +748,7 @@ var GhostMansion;
 /// <reference path="./map1.ts"/>
 /// <reference path="./network_selection.ts"/>
 /// <reference path="./local_selection.ts"/>
+/// <reference path="./map_selection.ts"/>
 var GhostMansion;
 (function (GhostMansion) {
     function startGame() {
@@ -731,6 +757,7 @@ var GhostMansion;
         game.state.add('Map1', GhostMansion.Map1);
         game.state.add('NetworkSelection', GhostMansion.NetworkSelection);
         game.state.add('LocalSelection', GhostMansion.LocalSelection);
+        game.state.add('MapSelection', GhostMansion.MapSelection);
         game.state.start('NetworkSelection');
     }
     GhostMansion.startGame = startGame;

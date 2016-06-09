@@ -3,6 +3,7 @@
 /// <reference path="./map1.ts"/>
 /// <reference path="./network_selection.ts"/>
 /// <reference path="./local_selection.ts"/>
+/// <reference path="./map_selection.ts"/>
 
 module GhostMansion {
     export function startGame() {
@@ -11,6 +12,7 @@ module GhostMansion {
         game.state.add('Map1', GhostMansion.Map1);
         game.state.add('NetworkSelection', GhostMansion.NetworkSelection);
         game.state.add('LocalSelection', GhostMansion.LocalSelection);
+        game.state.add('MapSelection', GhostMansion.MapSelection);
         game.state.start('NetworkSelection');
     }
 }
