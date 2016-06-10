@@ -17,8 +17,9 @@ module GhostMansion {
         }
 
         selectMap(map) {
-            this.setting.map = map;
-            return this.setting;
+            var clone = JSON.parse(JSON.stringify(this.setting));
+            clone.map = map;
+            return clone;
         }
     }
 }

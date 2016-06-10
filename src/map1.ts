@@ -15,10 +15,10 @@ module GhostMansion {
         boxStunned: any;
         boxPanicked: any;
         private lives = 3;
-        private playerCount: number;
+        private setting;
 
         init(setting) {
-            this.playerCount = setting.playerCount;
+            this.setting = setting;
         }
 
         create() {
@@ -31,9 +31,10 @@ module GhostMansion {
 
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
-            this.map.setCollision(404, true, 'walls');
+            // TODO: need to handle alpha for the background
             var background = this.map.createLayer('background');
             this.walls = this.map.createLayer('walls');
+            this.collideWalls();
 
             background.resizeWorld();
             this.walls.resizeWorld();
@@ -46,7 +47,7 @@ module GhostMansion {
                 down: Phaser.KeyCode.DOWN,
                 flashlight: Phaser.KeyCode.ENTER
             });
-            if (this.playerCount == 2) {
+            if (this.setting.playerCount == 2) {
                 this.addPlayer({
                     left: Phaser.KeyCode.A,
                     right: Phaser.KeyCode.D,
@@ -73,6 +74,18 @@ module GhostMansion {
                 this.gameOver();
             };
             this.ghost = ghost;
+        }
+
+        collideWalls() {
+            var distinctTileIndexsObj = {};
+            this.map.forEach((tile) => {
+                if (tile.index != -1 && tile.index != undefined) distinctTileIndexsObj[tile.index] = true;
+            }, this, 0, 0, this.map.width, this.map.height, this.walls);
+            var distinctTileIndexs = Object.keys(distinctTileIndexsObj);
+            console.log(distinctTileIndexs);
+            distinctTileIndexs.forEach((index) => {
+                this.map.setCollision(parseInt(index), true, 'walls');
+            });
         }
 
         addPlayer(keyMap) {

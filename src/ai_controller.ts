@@ -155,7 +155,7 @@ module GhostMansion {
                         if (tile == null) continue;
                         var tileId = this.tile2id(tile);
 
-                        if (prevTile[tileId] === undefined && tile.index != 404) {
+                        if (prevTile[tileId] === undefined && tile.index == -1) {
                             prevTile[tileId] = id;
                             newEdges.push(tile);
                         }
