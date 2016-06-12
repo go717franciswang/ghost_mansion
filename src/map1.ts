@@ -37,7 +37,8 @@ module GhostMansion {
             this.collideWalls();
 
             background.resizeWorld();
-            this.walls.resizeWorld();
+            background.alpha = 0.3;
+            // this.walls.resizeWorld();
 
             this.controllables = this.add.group();
             this.addPlayer({

@@ -525,12 +525,13 @@ var GhostMansion;
             this.boxPanicked = this.makeBox(0xffff00);
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
-            // this.map.setCollision(404, true, 'walls');
+            // TODO: need to handle alpha for the background
             var background = this.map.createLayer('background');
             this.walls = this.map.createLayer('walls');
             this.collideWalls();
             background.resizeWorld();
-            this.walls.resizeWorld();
+            background.alpha = 0.3;
+            // this.walls.resizeWorld();
             this.controllables = this.add.group();
             this.addPlayer({
                 left: Phaser.KeyCode.LEFT,
