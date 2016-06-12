@@ -83,7 +83,6 @@ module GhostMansion {
                 if (tile.index != -1 && tile.index != undefined) distinctTileIndexsObj[tile.index] = true;
             }, this, 0, 0, this.map.width, this.map.height, this.walls);
             var distinctTileIndexs = Object.keys(distinctTileIndexsObj);
-            console.log(distinctTileIndexs);
             distinctTileIndexs.forEach((index) => {
                 this.map.setCollision(parseInt(index), true, 'walls');
             });

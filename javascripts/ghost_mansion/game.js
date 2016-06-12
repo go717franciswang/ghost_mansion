@@ -455,8 +455,9 @@ var GhostMansion;
             var dy = y - this.sprite.y;
             var dsq = dx * dx + dy * dy;
             var a = Math.atan2(dy, dx);
-            return a >= this.inputController.direction - this.rayWidth / 2 &&
-                a <= this.inputController.direction + this.rayWidth / 2 &&
+            var angleDist = (a - this.inputController.direction) % (Math.PI * 2);
+            return angleDist >= -this.rayWidth / 2 &&
+                angleDist <= this.rayWidth / 2 &&
                 dsq <= this.rayLength * this.rayLength;
         };
         FlashLight.prototype.turnOn = function () {
@@ -574,7 +575,6 @@ var GhostMansion;
                     distinctTileIndexsObj[tile.index] = true;
             }, this, 0, 0, this.map.width, this.map.height, this.walls);
             var distinctTileIndexs = Object.keys(distinctTileIndexsObj);
-            console.log(distinctTileIndexs);
             distinctTileIndexs.forEach(function (index) {
                 _this.map.setCollision(parseInt(index), true, 'walls');
             });

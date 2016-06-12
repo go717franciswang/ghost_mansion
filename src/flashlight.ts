@@ -82,8 +82,12 @@ module GhostMansion {
             var dy = y - this.sprite.y;
             var dsq = dx*dx+dy*dy
             var a = Math.atan2(dy, dx);
-            return a >= this.inputController.direction - this.rayWidth/2 &&
-                a <= this.inputController.direction + this.rayWidth/2 &&
+            // sometimes a (angle from human to ghost) and direction (angle that human is facing)
+            // need to be modded by 2 pi for cases like
+            // a = -1.46 and direction = 4.82
+            var angleDist = (a - this.inputController.direction) % (Math.PI * 2);
+            return angleDist >= -this.rayWidth/2 &&
+                angleDist <= this.rayWidth/2 &&
                 dsq <= this.rayLength*this.rayLength;
         }
 
