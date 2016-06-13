@@ -455,7 +455,14 @@ var GhostMansion;
             var dy = y - this.sprite.y;
             var dsq = dx * dx + dy * dy;
             var a = Math.atan2(dy, dx);
+            // sometimes a (angle from human to ghost) and direction (angle that human is facing)
+            // need to be modded by 2 pi for cases like
+            // a = -1.46 and direction = 4.82
             var angleDist = (a - this.inputController.direction) % (Math.PI * 2);
+            while (angleDist < 0)
+                angleDist += Math.PI * 2;
+            angleDist = Math.min(angleDist, Math.PI * 2 - angleDist);
+            console.log(angleDist);
             return angleDist >= -this.rayWidth / 2 &&
                 angleDist <= this.rayWidth / 2 &&
                 dsq <= this.rayLength * this.rayLength;
@@ -526,7 +533,6 @@ var GhostMansion;
             this.boxPanicked = this.makeBox(0xffff00);
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
-            // TODO: need to handle alpha for the background
             var background = this.map.createLayer('background');
             this.walls = this.map.createLayer('walls');
             this.collideWalls();

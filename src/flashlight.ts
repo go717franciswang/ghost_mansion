@@ -86,6 +86,9 @@ module GhostMansion {
             // need to be modded by 2 pi for cases like
             // a = -1.46 and direction = 4.82
             var angleDist = (a - this.inputController.direction) % (Math.PI * 2);
+            while (angleDist < 0) angleDist += Math.PI * 2;
+            angleDist = Math.min(angleDist, Math.PI * 2 - angleDist);
+            console.log(angleDist);
             return angleDist >= -this.rayWidth/2 &&
                 angleDist <= this.rayWidth/2 &&
                 dsq <= this.rayLength*this.rayLength;

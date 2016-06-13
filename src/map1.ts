@@ -31,7 +31,6 @@ module GhostMansion {
 
             this.map = this.add.tilemap('map');
             this.map.addTilesetImage('biomechamorphs_001', 'tiles');
-            // TODO: need to handle alpha for the background
             var background = this.map.createLayer('background');
             this.walls = this.map.createLayer('walls');
             this.collideWalls();
