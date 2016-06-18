@@ -1,9 +1,10 @@
 {
-  "name": "socket-chat-example",
+  "name": "ghost_mansion_server",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "Server for GhostMansion",
   "dependencies": {
     "express": "^4.10.2",
+    "promise": "^7.1.1",
     "socket.io": "^1.4.6"
   }
 }
