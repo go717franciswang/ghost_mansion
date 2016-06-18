@@ -1,6 +1,4 @@
-///<reference path='node.d.ts'/>
-///<reference path='express.d.ts'/>
-///<reference path='socket.io.d.ts'/>
+///<reference path='typings/index.d.ts'/>
 "use strict";
 var http = require("http");
 var express = require("express");

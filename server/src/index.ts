@@ -1,6 +1,4 @@
-///<reference path='node.d.ts'/>
-///<reference path='express.d.ts'/>
-///<reference path='socket.io.d.ts'/>
+///<reference path='typings/index.d.ts'/>
 
 import http = require("http");
 import express = require("express");
