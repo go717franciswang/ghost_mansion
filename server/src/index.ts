@@ -1,9 +1,13 @@
-import * as express from "express";
-import * as http from "http";
-import * as socketio from "socket.io";
+///<reference path='node.d.ts'/>
+///<reference path='express.d.ts'/>
+///<reference path='socket.io.d.ts'/>
+
+import http = require("http");
+import express = require("express");
+import socketio = require("socket.io");
 
 var app = express();
-var server = http.Server(app);
+var server = http.createServer(app);
 var io = socketio(server);
 
 app.get('/', (req, res) => {
