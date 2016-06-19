@@ -1,14 +1,8 @@
 ///<reference path='typings/index.d.ts'/>
 
-import http = require("http");
-import express = require("express");
 import socketio = require("socket.io");
 import Promise = require("promise");
 import fs = require("fs");
-
-var app = express();
-var server = http.createServer(app);
-var io = socketio(server);
 
 var loadMap = (mapName) => {
     return new Promise(() => {
@@ -21,14 +15,9 @@ var loadMap = (mapName) => {
     });
 };
 
-app.get('/', (req, res) => {
-    res.sendfile('index.html');
-});
-
+var io = socketio();
 io.on('connection', (socket) => {
     console.log('a user connected');
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
-});
+io.listen(3000);

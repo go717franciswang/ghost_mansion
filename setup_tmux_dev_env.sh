@@ -9,8 +9,12 @@ tmux split-window -h -t 1
 tmux send-keys -t gamedev:0 "git status" C-m
 
 tmux new-window -t gamedev
-tmux rename-window "server"
+tmux rename-window "static-server"
 tmux send-keys -t gamedev:1 "bash run.sh" C-m
+
+tmux new-window -t gamedev
+tmux rename-window "multiplayer-server"
+tmux send-keys -t gamedev:2 "cd server" C-m "node index.js" C-m
 
 tmux select-window -t gamedev:0
 tmux select-pane -t 0
