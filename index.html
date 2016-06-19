@@ -2,7 +2,6 @@
 <head>
 <script src="/javascripts/ghost_mansion/phaser.min.js"></script>
 <script src="/javascripts/ghost_mansion/socket.io-1.4.5.js"></script>
-<!--<script src="http://192.168.1.129:3000/socket.io/socket.io.js"></script>-->
 <script src="/javascripts/ghost_mansion/visibility-polygon-js/visibility_polygon.js"></script>
 </head>
 <body>
@@ -10,6 +9,9 @@
 <script src="/javascripts/ghost_mansion/game.js"></script>
 <script>
 var socket = io('http://192.168.1.129:3000');
+socket.emit('move', {dx: 10, dy: 10});
+socket.emit('move', {dx: 10, dy: 10});
+socket.emit('flashlight', {on: true});
 GhostMansion.startGame();
 </script>
 </body>
