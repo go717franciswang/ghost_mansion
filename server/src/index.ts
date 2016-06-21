@@ -9,6 +9,8 @@ mapNames.forEach((m) => {
     maps[m] = require(__dirname + '/../resources/ghost_mansion/'+m+'.json');
 });
 
+var game = new Phaser.Game(320, 240, Phaser.AUTO, 'container');
+
 var io = socketio();
 var playerId = 0;
 io.on('connection', (socket) => {
