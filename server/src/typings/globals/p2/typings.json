@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/photonstorm/phaser/master/typescript/p2.d.ts",
+    "raw": "github:photonstorm/phaser/typescript/p2.d.ts",
+    "typings": "https://raw.githubusercontent.com/photonstorm/phaser/master/typescript/p2.d.ts"
+  }
+}

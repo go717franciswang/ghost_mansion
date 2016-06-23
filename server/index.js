@@ -6,16 +6,24 @@ var mapNames = ["main-floor", "research-lab"];
 mapNames.forEach(function (m) {
     maps[m] = require(__dirname + '/../resources/ghost_mansion/' + m + '.json');
 });
+var game = new Phaser.Game(320, 240, Phaser.HEADLESS);
+var physics = new Phaser.Physics.Arcade(game);
 var io = socketio();
 var playerId = 0;
 io.on('connection', function (socket) {
     console.log('a user connected');
     console.log(maps);
     var player = {
+        body: null,
+        x: 50,
+        y: 50,
         position: { x: 50, y: 50 },
         flashlight: 100,
         playerId: playerId++
     };
+    var body = new Phaser.Physics.Arcade.Body(player);
+    player.body = body;
+    physics.enableBody(player);
     socket.on('move', function (data) {
         console.log('got move command');
         player.position.x += data.dx;

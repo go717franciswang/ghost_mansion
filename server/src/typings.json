@@ -5,6 +5,7 @@
     "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160602151406",
     "mime": "registry:dt/mime#0.0.0+20160316155526",
     "node": "registry:dt/node#6.0.0+20160613154055",
+    "p2": "github:photonstorm/phaser/typescript/p2.d.ts",
     "phaser": "github:photonstorm/phaser/typescript/phaser.d.ts",
     "pixi": "github:photonstorm/phaser/typescript/pixi.d.ts",
     "promise": "registry:dt/promise#7.1.1+20160602154553",
