@@ -13,6 +13,7 @@ var playerId = 0;
 io.on('connection', function (socket) {
     console.log('a user connected');
     console.log(maps);
+    var sprite = new Phaser.Sprite(game, 50, 50);
     var player = {
         body: null,
         x: 50,
@@ -23,7 +24,8 @@ io.on('connection', function (socket) {
     };
     var body = new Phaser.Physics.Arcade.Body(player);
     player.body = body;
-    physics.enableBody(player);
+    sprite.body = body;
+    physics.enableBody(sprite);
     socket.on('move', function (data) {
         console.log('got move command');
         player.position.x += data.dx;
