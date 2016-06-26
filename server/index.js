@@ -1,6 +1,7 @@
 ///<reference path='typings/index.d.ts'/>
 "use strict";
 var socketio = require("socket.io");
+var Phaser = require("phaser");
 var maps = {};
 var mapNames = ["main-floor", "research-lab"];
 mapNames.forEach(function (m) {

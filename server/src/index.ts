@@ -2,6 +2,7 @@
 
 import socketio = require("socket.io");
 import fs = require("fs");
+import Phaser = require("phaser");
 
 var maps = {};
 var mapNames = ["main-floor", "research-lab"];
