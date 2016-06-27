@@ -10,15 +10,15 @@ mapNames.forEach((m) => {
     maps[m] = require(__dirname + '/../resources/ghost_mansion/'+m+'.json');
 });
 
-var game = new Phaser.Game(320, 240, Phaser.HEADLESS);
-var physics = new Phaser.Physics.Arcade(game);
+// var game = new Phaser.Game(320, 240, Phaser.HEADLESS);
+var physics = new Phaser.Physics.Arcade(null);
 
 var io = socketio();
 var playerId = 0;
 io.on('connection', (socket) => {
     console.log('a user connected');
     console.log(maps);
-    var sprite = new Phaser.Sprite(game, 50, 50);
+    var sprite = new Phaser.Sprite(null, 50, 50);
     var player:any = {
         body: null,
         x: 50,
