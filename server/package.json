@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Server for GhostMansion",
   "dependencies": {
+    "document-shim": "^1.0.0",
     "express": "^4.10.2",
     "phaser": "^2.5.0",
     "promise": "^7.1.1",
