@@ -2,7 +2,7 @@
 
 import socketio = require("socket.io");
 import fs = require("fs");
-import document = require('document-shim');
+var document = require("document-shim");
 import Phaser = require("phaser");
 
 var maps = {};
