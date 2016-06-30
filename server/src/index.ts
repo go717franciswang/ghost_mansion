@@ -3,7 +3,7 @@
 import socketio = require("socket.io");
 import fs = require("fs");
 var document = require("document-shim");
-import Phaser = require("phaser");
+var Phaser = require(__dirname + "/phaser.js");
 
 var maps = {};
 var mapNames = ["main-floor", "research-lab"];

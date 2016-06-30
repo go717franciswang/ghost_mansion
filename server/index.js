@@ -2,8 +2,7 @@
 "use strict";
 var socketio = require("socket.io");
 var document = require("document-shim");
-document = {};
-var Phaser = require("phaser");
+var Phaser = require(__dirname + "/phaser.js");
 var maps = {};
 var mapNames = ["main-floor", "research-lab"];
 mapNames.forEach(function (m) {
