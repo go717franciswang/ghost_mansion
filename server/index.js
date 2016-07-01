@@ -1,8 +1,12 @@
 ///<reference path='typings/index.d.ts'/>
 "use strict";
 var socketio = require("socket.io");
-var document = require("document-shim");
-var Phaser = require(__dirname + "/phaser.js");
+// var document = require("document-shim");
+var g = global;
+// g.document = undefined;
+g.PIXI = { DisplayObjectContainer: { prototype: null } };
+g.window = {};
+var Phaser = require(__dirname + "/node_modules/phaser/build/custom/phaser-split.js");
 var maps = {};
 var mapNames = ["main-floor", "research-lab"];
 mapNames.forEach(function (m) {
